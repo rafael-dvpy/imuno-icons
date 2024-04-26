@@ -15,6 +15,7 @@ function App() {
   const [bgLayer, setBgLayer] = useState<Layer>(new Konva.Layer());
   const [selectedShape, setSelectedShape] = useState<string>();
 
+
   useEffect(() => {
     const width = window.innerWidth;
     const height = window.innerHeight;
@@ -103,7 +104,7 @@ function App() {
     document.body.removeChild(link);
   }
 
-  const addCircle = () => {
+  const addBG = () => {
     const circle = new Konva.Rect({
       x: 0,
       y: 0,
@@ -122,8 +123,56 @@ function App() {
     }
   }
 
-  addCircle()
+  addBG()
 
+  const addArrow = () => {
+    const arrow = new Konva.Arrow({
+      x: stage.width() / 4,
+      y: stage.height() / 4,
+      points: [0, 0, stage.width() / 2, stage.height() / 2],
+      pointerLength: 20,
+      pointerWidth: 20,
+      fill: 'black',
+      stroke: 'black',
+      strokeWidth: 4,
+      draggable: true,
+    })
+    addTransformer(arrow)
+    layer.add(arrow);
+    layer.draw();
+  }
+
+  const addRectWithText = () => {
+    const position = stage.getPointerPosition();
+    const group = new Konva.Group({
+      x: position.x,
+      y: position.y,
+      draggable: true,
+    });
+
+    const rect = new Konva.Rect({
+      x: 0,
+      y: 0,
+      width: 200,
+      height: 100,
+      fill: 'lightblue',
+    });
+
+    const text = new Konva.Text({
+      x: 10,
+      y: 10,
+      text: 'Type something...',
+      fontSize: 16,
+      fontFamily: 'Arial',
+      fill: 'black',
+    });
+
+    group.add(rect);
+    group.add(text);
+    addTransformer(group);
+    layer.add(group);
+    layer.draw();
+  };
   return (
     <div className="flex h-screen">
       <div className="w-1/6 bg-gray-800 flex flex-col items-center py-8">
@@ -154,9 +203,16 @@ function App() {
         <button
           id="add-circle-btn"
           className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 mt-4"
-          onClick={addCircle}
+          onClick={() => addArrow()}
         >
-          Add Circle
+          Add Arrow
+        </button>
+        <button
+          id="add-circle-btn"
+          className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 mt-4"
+          onClick={() => addRectWithText()}
+        >
+          Add Text
         </button>
       </div>
       <div className="flex-1 bg-gray-400" id="stage-container">
