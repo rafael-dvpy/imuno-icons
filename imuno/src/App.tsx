@@ -186,10 +186,15 @@ function App() {
           fill: 'lightblue',
         });
         const text = new Konva.Text({
-          x: x + 100,
-          y: y + 40,
+          x: x,
+          y: y,
           text: content,
+          align: "center",
+          verticalAlign: "center",
+          padding: 34,
           fontSize: 16,
+          width: 200,
+          height: 100,
           fontFamily: 'Arial',
           fill: 'black',
         });
