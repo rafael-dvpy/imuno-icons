@@ -4,9 +4,8 @@ import { Stage } from 'konva/lib/Stage';
 import { Layer } from 'konva/lib/Layer';
 
 const shapes = [
-  { id: 'svg1', url: '../files/svg1.svg' },
-  { id: 'svg2', url: '../files/svg2.svg' },
-  { id: 'svg3', url: '../files/svg3.svg' },
+  { id: 'virus', url: '../files/virus.svg' },
+  { id: 'anticorpo', url: '../files/icion_anticorpo.svg' },
 ];
 
 function App() {
@@ -15,14 +14,13 @@ function App() {
   const [bgLayer, setBgLayer] = useState<Layer>(new Konva.Layer());
   const [selectedShape, setSelectedShape] = useState<string>();
 
-
   useEffect(() => {
     const width = window.innerWidth;
     const height = window.innerHeight;
     const konvaStage = new Konva.Stage({
       container: 'stage',
-      width: width - 100,
-      height: height,
+      width: 800 - 100,
+      height: 600,
     });
     const konvaLayer = new Konva.Layer();
     const konvaBgLayer = new Konva.Layer();
@@ -125,57 +123,95 @@ function App() {
 
   addBG()
 
+
   const addArrow = () => {
-    const arrow = new Konva.Arrow({
-      x: stage.width() / 4,
-      y: stage.height() / 4,
-      points: [0, 0, stage.width() / 2, stage.height() / 2],
-      pointerLength: 20,
-      pointerWidth: 20,
-      fill: 'black',
-      stroke: 'black',
-      strokeWidth: 4,
-      draggable: true,
-    })
-    addTransformer(arrow)
-    layer.add(arrow);
-    layer.draw();
+    if (stage) {
+      const remove = () => {
+        stage.off('mousedown')
+        stage.off('mouseup')
+      }
+      let startX: number, startY: number, endX, endY;
+      stage.on('mousedown', (e) => {
+        startX = e.evt.offsetX;
+        startY = e.evt.offsetY;
+      });
+
+      stage.on('mouseup', (e) => {
+        endX = e.evt.offsetX;
+        endY = e.evt.offsetY;
+
+        const arrow = new Konva.Arrow({
+          x: 0,
+          y: 0,
+          points: [startX, startY, endX, endY],
+          pointerLength: 20,
+          pointerWidth: 20,
+          fill: 'black',
+          stroke: 'black',
+          strokeWidth: 4,
+          draggable: true,
+        });
+        addTransformer(arrow);
+        layer.add(arrow);
+        layer.draw();
+        remove()
+      });
+    }
   }
 
-  const addRectWithText = () => {
-    const position = stage.getPointerPosition();
-    const group = new Konva.Group({
-      x: position.x,
-      y: position.y,
-      draggable: true,
-    });
 
-    const rect = new Konva.Rect({
-      x: 0,
-      y: 0,
-      width: 200,
-      height: 100,
-      fill: 'lightblue',
-    });
+  const addRectWithText = (content: string) => {
+    if (stage) {
+      const remove = () => {
+        stage.off('mousedown')
+        stage.off('mouseup')
+      }
+      let x: number, y: number
+      stage.on('mousedown', (e) => {
+        x = e.evt.offsetX;
+        y = e.evt.offsetY;
+      });
 
-    const text = new Konva.Text({
-      x: 10,
-      y: 10,
-      text: 'Type something...',
-      fontSize: 16,
-      fontFamily: 'Arial',
-      fill: 'black',
-    });
-
-    group.add(rect);
-    group.add(text);
-    addTransformer(group);
-    layer.add(group);
-    layer.draw();
+      stage.on('mouseup', () => {
+        const group = new Konva.Group({
+          x: -100,
+          y: -50,
+          draggable: true,
+        });
+        const rect = new Konva.Rect({
+          x: x,
+          y: y,
+          width: 200,
+          height: 100,
+          fill: 'lightblue',
+        });
+        const text = new Konva.Text({
+          x: x + 100,
+          y: y + 40,
+          text: content,
+          fontSize: 16,
+          fontFamily: 'Arial',
+          fill: 'black',
+        });
+        group.add(rect);
+        group.add(text);
+        addTransformer(group);
+        layer.add(group);
+        layer.draw();
+        remove()
+      })
+    }
   };
+
+  const [textContent, setTextContent] = useState("")
+
+  const handleTextChange = (e: React.FormEvent<HTMLTextAreaElement>) => {
+    setTextContent(e.currentTarget.value)
+  }
+
   return (
     <div className="flex h-screen">
-      <div className="w-1/6 bg-gray-800 flex flex-col items-center py-8">
+      <div className="bg-gray-800 flex flex-col items-center py-8">
         <div className="mb-4">
           {shapes.map((shape) => (
             <div
@@ -187,12 +223,6 @@ function App() {
             </div>
           ))}
         </div>
-        <button
-          id="delete-btn"
-          className="px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700"
-        >
-          Delete
-        </button>
         <button
           id="save-btn"
           className="px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700"
@@ -210,13 +240,16 @@ function App() {
         <button
           id="add-circle-btn"
           className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 mt-4"
-          onClick={() => addRectWithText()}
+          onClick={() => addRectWithText(textContent)}
         >
           Add Text
         </button>
+        <textarea onChange={(e) => handleTextChange(e)} />
       </div>
-      <div className="flex-1 bg-gray-400" id="stage-container">
-        <div id="stage" onClick={handleStageClick}></div>
+      <div className="bg-gray-400" id="stage-container">
+        <div className='w-screen bg-gray-400 content-center h-screen flex justify-center items-center'>
+          <div id="stage" className='' onClick={handleStageClick}></div>
+        </div>
       </div>
     </div >
   );
