@@ -1,11 +1,17 @@
-import { useEffect, useState } from 'react';
-import Konva from 'konva';
-import { Stage } from 'konva/lib/Stage';
-import { Layer } from 'konva/lib/Layer';
+import { useEffect, useState } from "react";
+import Konva from "konva";
+import { Stage } from "konva/lib/Stage";
+import { Layer } from "konva/lib/Layer";
 
 const shapes = [
-  { id: 'virus', url: '../files/virus.svg' },
-  { id: 'anticorpo', url: '../files/icion_anticorpo.svg' },
+  { id: "virus", url: "../files/virus.svg" },
+  { id: "anticorpo", url: "../files/icion_anticorpo.svg" },
+  { id: "cell-t", url: "../files/cell-t.svg" },
+  { id: "antigen", url: "../files/antigen.svg" },
+  { id: "dend-cell", url: "../files/dend-cell.svg" },
+  { id: "mch-2", url: "../files/mch-2.svg" },
+  { id: "t-receptor", url: "../files/t-receptor.svg" },
+  { id: "anticorpo", url: "../files/icion_anticorpo.svg" },
 ];
 
 function App() {
@@ -18,7 +24,7 @@ function App() {
     const width = window.innerWidth;
     const height = window.innerHeight;
     const konvaStage = new Konva.Stage({
-      container: 'stage',
+      container: "stage",
       width: 800 - 100,
       height: 600,
     });
@@ -52,22 +58,22 @@ function App() {
   const addTransformer = (node: Konva.Image) => {
     const transformer = new Konva.Transformer();
     layer.add(transformer);
-    node.on('click', () => {
+    node.on("click", () => {
       transformer.nodes([node]);
       layer.batchDraw();
     });
-    stage?.on('click', (e) => {
+    stage?.on("click", (e) => {
       if (e.target === stage) {
         transformer.detach();
         layer.draw();
       }
     });
-    document.addEventListener('keydown', (e) => {
-      if (e.key === 'Escape') {
+    document.addEventListener("keydown", (e) => {
+      if (e.key === "Escape") {
         transformer.detach();
         layer.draw();
-      } else if (e.key === 'Delete') {
-        const nodes = transformer.nodes()
+      } else if (e.key === "Delete") {
+        const nodes = transformer.nodes();
         for (let i = 0; i < nodes.length; i++) {
           if (node === nodes[i]) {
             node.destroy();
@@ -94,7 +100,7 @@ function App() {
   };
 
   function downloadURI(uri: string, name: string) {
-    var link = document.createElement('a');
+    const link = document.createElement("a");
     link.download = name;
     link.href = uri;
     document.body.appendChild(link);
@@ -108,35 +114,34 @@ function App() {
       y: 0,
       width: stage?.width(),
       height: stage?.height(),
-      fill: 'white',
+      fill: "white",
     });
     bgLayer.add(circle);
     bgLayer.batchDraw();
   };
 
   const handleSaveClick = () => {
-    var dataURL = stage?.toDataURL({ pixelRatio: 3 });
+    const dataURL = stage?.toDataURL({ pixelRatio: 3 });
     if (dataURL) {
-      downloadURI(dataURL, "stage.svg")
+      downloadURI(dataURL, "stage.png");
     }
-  }
+  };
 
-  addBG()
-
+  addBG();
 
   const addArrow = () => {
     if (stage) {
       const remove = () => {
-        stage.off('mousedown')
-        stage.off('mouseup')
-      }
+        stage.off("mousedown");
+        stage.off("mouseup");
+      };
       let startX: number, startY: number, endX, endY;
-      stage.on('mousedown', (e) => {
+      stage.on("mousedown", (e) => {
         startX = e.evt.offsetX;
         startY = e.evt.offsetY;
       });
 
-      stage.on('mouseup', (e) => {
+      stage.on("mouseup", (e) => {
         endX = e.evt.offsetX;
         endY = e.evt.offsetY;
 
@@ -146,33 +151,32 @@ function App() {
           points: [startX, startY, endX, endY],
           pointerLength: 20,
           pointerWidth: 20,
-          fill: 'black',
-          stroke: 'black',
+          fill: "black",
+          stroke: "black",
           strokeWidth: 4,
           draggable: true,
         });
         addTransformer(arrow);
         layer.add(arrow);
         layer.draw();
-        remove()
+        remove();
       });
     }
-  }
-
+  };
 
   const addRectWithText = (content: string) => {
     if (stage) {
       const remove = () => {
-        stage.off('mousedown')
-        stage.off('mouseup')
-      }
-      let x: number, y: number
-      stage.on('mousedown', (e) => {
+        stage.off("mousedown");
+        stage.off("mouseup");
+      };
+      let x: number, y: number;
+      stage.on("mousedown", (e) => {
         x = e.evt.offsetX;
         y = e.evt.offsetY;
       });
 
-      stage.on('mouseup', () => {
+      stage.on("mouseup", () => {
         const group = new Konva.Group({
           x: -100,
           y: -50,
@@ -183,7 +187,7 @@ function App() {
           y: y,
           width: 200,
           height: 100,
-          fill: 'lightblue',
+          fill: "lightblue",
         });
         const text = new Konva.Text({
           x: x,
@@ -195,24 +199,24 @@ function App() {
           fontSize: 16,
           width: 200,
           height: 100,
-          fontFamily: 'Arial',
-          fill: 'black',
+          fontFamily: "Arial",
+          fill: "black",
         });
         group.add(rect);
         group.add(text);
         addTransformer(group);
         layer.add(group);
         layer.draw();
-        remove()
-      })
+        remove();
+      });
     }
   };
 
-  const [textContent, setTextContent] = useState("")
+  const [textContent, setTextContent] = useState("");
 
   const handleTextChange = (e: React.FormEvent<HTMLTextAreaElement>) => {
-    setTextContent(e.currentTarget.value)
-  }
+    setTextContent(e.currentTarget.value);
+  };
 
   return (
     <div className="flex h-screen">
@@ -224,7 +228,11 @@ function App() {
               className="w-10 h-10 bg-gray-600 rounded cursor-pointer mb-2"
               onClick={() => handleShapeClick(shape.id)}
             >
-              <img src={shape.url} alt={shape.id} className="w-full h-full object-cover" />
+              <img
+                src={shape.url}
+                alt={shape.id}
+                className="w-full h-full object-cover"
+              />
             </div>
           ))}
         </div>
@@ -252,11 +260,11 @@ function App() {
         <textarea onChange={(e) => handleTextChange(e)} />
       </div>
       <div className="bg-gray-400" id="stage-container">
-        <div className='w-screen bg-gray-400 content-center h-screen flex justify-center items-center'>
-          <div id="stage" className='' onClick={handleStageClick}></div>
+        <div className="w-screen bg-gray-400 content-center h-screen flex justify-center items-center">
+          <div id="stage" className="" onClick={handleStageClick}></div>
         </div>
       </div>
-    </div >
+    </div>
   );
 }
 
