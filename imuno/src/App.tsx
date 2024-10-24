@@ -21,8 +21,6 @@ function App() {
   const [selectedShape, setSelectedShape] = useState<string>();
 
   useEffect(() => {
-    const width = window.innerWidth;
-    const height = window.innerHeight;
     const konvaStage = new Konva.Stage({
       container: "stage",
       width: 800 - 100,
@@ -35,6 +33,7 @@ function App() {
     setStage(konvaStage);
     setLayer(konvaLayer);
     setBgLayer(konvaBgLayer);
+    addBG(); // Mova addBG para dentro do useEffect
   }, []);
 
   const addSvg = (x: number, y: number, svg: string) => {
@@ -55,7 +54,7 @@ function App() {
     image.src = svg;
   };
 
-  const addTransformer = (node: Konva.Image) => {
+  const addTransformer = (node: Konva.Node) => {
     const transformer = new Konva.Transformer();
     layer.add(transformer);
     node.on("click", () => {
@@ -126,8 +125,6 @@ function App() {
       downloadURI(dataURL, "stage.png");
     }
   };
-
-  addBG();
 
   const addArrow = () => {
     if (stage) {
@@ -261,7 +258,7 @@ function App() {
       </div>
       <div className="bg-gray-400" id="stage-container">
         <div className="w-screen bg-gray-400 content-center h-screen flex justify-center items-center">
-          <div id="stage" className="" onClick={handleStageClick}></div>
+          <div id="stage" className="bg-white" onClick={handleStageClick}></div>
         </div>
       </div>
     </div>
