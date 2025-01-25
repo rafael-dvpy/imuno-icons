@@ -3,6 +3,7 @@ import Konva from "konva";
 import { Stage } from "konva/lib/Stage";
 import { Layer } from "konva/lib/Layer";
 import SideBar from "./components/SideBar/SideBar.component";
+import TopBar from "./components/TopBar/TopBar.component"; // Import the TopBar
 
 const shapes = [
   { id: "virus", url: "/files/virus.svg" },
@@ -12,7 +13,6 @@ const shapes = [
   { id: "dend-cell", url: "/files/dend-cell.svg" },
   { id: "mch-2", url: "/files/mch-2.svg" },
   { id: "t-receptor", url: "/files/t-receptor.svg" },
-  { id: "anticorpo", url: "/files/icion_anticorpo.svg" },
 ];
 
 function App() {
@@ -20,6 +20,11 @@ function App() {
   const [layer, setLayer] = useState<Layer>(new Konva.Layer());
   const [bgLayer, setBgLayer] = useState<Layer>(new Konva.Layer());
   const [selectedShape, setSelectedShape] = useState<string>();
+  const [textContent, setTextContent] = useState<string>("");
+
+  // History stack for undo/redo
+  const [history, setHistory] = useState<any[]>([]); // Stack of history states
+  const [historyPointer, setHistoryPointer] = useState<number>(-1); // Points to the current position in history
 
   useEffect(() => {
     const konvaStage = new Konva.Stage({
@@ -34,8 +39,45 @@ function App() {
     setStage(konvaStage);
     setLayer(konvaLayer);
     setBgLayer(konvaBgLayer);
-    addBG(); // Mova addBG para dentro do useEffect
+    addBG(); // Initialize the background
   }, []);
+
+  // Helper function to add actions to history
+  const addHistory = (action: string, data: any) => {
+    const newHistory = history.slice(0, historyPointer + 1); // Remove any future actions after historyPointer
+    newHistory.push({ action, data });
+    setHistory(newHistory);
+    setHistoryPointer(newHistory.length - 1); // Move pointer to the new action
+  };
+
+  // Undo functionality
+  const undo = () => {
+    if (historyPointer >= 0) {
+      const previousAction = history[historyPointer];
+      if (previousAction.action === "add") {
+        // Undo add by removing the shape
+        previousAction.data.destroy();
+        layer.draw();
+      }
+      // Move pointer back
+      setHistoryPointer(historyPointer - 1);
+    }
+  };
+
+  // Redo functionality
+  const redo = () => {
+    if (historyPointer < history.length - 1) {
+      const nextAction = history[historyPointer + 1];
+      if (nextAction.action === "add") {
+        // Redo add by adding the shape again
+        const shape = nextAction.data;
+        layer.add(shape);
+        layer.draw();
+      }
+      // Move pointer forward
+      setHistoryPointer(historyPointer + 1);
+    }
+  };
 
   const addSvg = (x: number, y: number, svg: string) => {
     const image = new window.Image();
@@ -51,6 +93,9 @@ function App() {
       addTransformer(konvaImage);
       layer.add(konvaImage);
       layer.draw();
+
+      // Add this action to history
+      addHistory("add", konvaImage);
     };
     image.src = svg;
   };
@@ -78,6 +123,7 @@ function App() {
           if (node === nodes[i]) {
             node.destroy();
             transformer.destroy();
+            addHistory("remove", node); // Track removal for undo
           }
         }
       }
@@ -99,14 +145,14 @@ function App() {
     }
   };
 
-  function downloadURI(uri: string, name: string) {
+  const downloadURI = (uri: string, name: string) => {
     const link = document.createElement("a");
     link.download = name;
     link.href = uri;
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
-  }
+  };
 
   const addBG = () => {
     const circle = new Konva.Rect({
@@ -157,12 +203,15 @@ function App() {
         addTransformer(arrow);
         layer.add(arrow);
         layer.draw();
+
+        // Add arrow to history
+        addHistory("add", arrow);
         remove();
       });
     }
   };
 
-  const addRectWithText = (content: string) => {
+  const addRectWithText = () => {
     if (stage) {
       const remove = () => {
         stage.off("mousedown");
@@ -190,7 +239,7 @@ function App() {
         const text = new Konva.Text({
           x: x,
           y: y,
-          text: content,
+          text: textContent,
           align: "center",
           verticalAlign: "center",
           padding: 34,
@@ -205,12 +254,13 @@ function App() {
         addTransformer(group);
         layer.add(group);
         layer.draw();
+
+        // Add to history
+        addHistory("add", group);
         remove();
       });
     }
   };
-
-  const [textContent, setTextContent] = useState("");
 
   const handleTextChange = (e: React.FormEvent<HTMLTextAreaElement>) => {
     setTextContent(e.currentTarget.value);
@@ -221,6 +271,15 @@ function App() {
       <div className="flex h-screen w-screen">
         <SideBar onItemClick={setSelectedShape} />
 
+        {/* TopBar - Control area at the top */}
+        <TopBar
+          onSaveClick={handleSaveClick}
+          onAddArrow={addArrow}
+          onAddText={addRectWithText}
+          onUndo={undo} // Add undo button
+          onRedo={redo} // Add redo button
+        />
+
         <div className="bg-gray-400 w-screen" id="stage-container">
           <div className="bg-gray-400 content-center h-screen flex justify-center items-center">
             <div
@@ -229,30 +288,6 @@ function App() {
               onClick={handleStageClick}
             ></div>
           </div>
-        </div>
-        <div className="bg-gray-800 flex flex-col items-center py-8">
-          <button
-            id="save-btn"
-            className="px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700"
-            onClick={() => handleSaveClick()}
-          >
-            Save
-          </button>
-          <button
-            id="add-circle-btn"
-            className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 mt-4"
-            onClick={() => addArrow()}
-          >
-            Add Arrow
-          </button>
-          <button
-            id="add-circle-btn"
-            className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 mt-4"
-            onClick={() => addRectWithText(textContent)}
-          >
-            Add Text
-          </button>
-          <textarea onChange={(e) => handleTextChange(e)} />
         </div>
       </div>
     </>
