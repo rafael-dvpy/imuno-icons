@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import Konva from "konva";
 import { Stage } from "konva/lib/Stage";
 import { Layer } from "konva/lib/Layer";
+import SideBar from "./components/SideBar/SideBar.component";
 
 const shapes = [
   { id: "virus", url: "/files/virus.svg" },
@@ -216,52 +217,45 @@ function App() {
   };
 
   return (
-    <div className="flex h-screen">
-      <div className="bg-gray-800 flex flex-col items-center py-8">
-        <div className="mb-4">
-          {shapes.map((shape) => (
+    <>
+      <div className="flex h-screen w-screen">
+        <SideBar onItemClick={setSelectedShape} />
+
+        <div className="bg-gray-400 w-screen" id="stage-container">
+          <div className="bg-gray-400 content-center h-screen flex justify-center items-center">
             <div
-              key={shape.id}
-              className="w-10 h-10 bg-gray-600 rounded cursor-pointer mb-2"
-              onClick={() => handleShapeClick(shape.id)}
-            >
-              <img
-                src={shape.url}
-                alt={shape.id}
-                className="w-full h-full object-cover"
-              />
-            </div>
-          ))}
+              id="stage"
+              className="bg-white"
+              onClick={handleStageClick}
+            ></div>
+          </div>
         </div>
-        <button
-          id="save-btn"
-          className="px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700"
-          onClick={() => handleSaveClick()}
-        >
-          Save
-        </button>
-        <button
-          id="add-circle-btn"
-          className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 mt-4"
-          onClick={() => addArrow()}
-        >
-          Add Arrow
-        </button>
-        <button
-          id="add-circle-btn"
-          className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 mt-4"
-          onClick={() => addRectWithText(textContent)}
-        >
-          Add Text
-        </button>
-        <textarea onChange={(e) => handleTextChange(e)} />
-      </div>
-      <div className="bg-gray-400" id="stage-container">
-        <div className="w-screen bg-gray-400 content-center h-screen flex justify-center items-center">
-          <div id="stage" className="bg-white" onClick={handleStageClick}></div>
+        <div className="bg-gray-800 flex flex-col items-center py-8">
+          <button
+            id="save-btn"
+            className="px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700"
+            onClick={() => handleSaveClick()}
+          >
+            Save
+          </button>
+          <button
+            id="add-circle-btn"
+            className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 mt-4"
+            onClick={() => addArrow()}
+          >
+            Add Arrow
+          </button>
+          <button
+            id="add-circle-btn"
+            className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 mt-4"
+            onClick={() => addRectWithText(textContent)}
+          >
+            Add Text
+          </button>
+          <textarea onChange={(e) => handleTextChange(e)} />
         </div>
       </div>
-    </div>
+    </>
   );
 }
 
