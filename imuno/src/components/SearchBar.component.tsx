@@ -1,6 +1,5 @@
 import React, { ChangeEvent, useState, useEffect } from "react";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faMagnifyingGlass } from "@fortawesome/free-solid-svg-icons";
+import { Search } from 'lucide-react';
 
 interface SearchBarProps {
   onSearch: (searchTerm: string) => void;
@@ -16,9 +15,9 @@ const SearchBar: React.FC<SearchBarProps> = ({
   useEffect(() => {
     const timer = setTimeout(() => {
       onSearch(inputValue);
-    }, 500); // 500ms debounce time
+    }, 300);
 
-    return () => clearTimeout(timer); // Clear the timer on each change
+    return () => clearTimeout(timer);
   }, [inputValue, onSearch]);
 
   const handleChange = (e: ChangeEvent<HTMLInputElement>) => {
@@ -26,16 +25,15 @@ const SearchBar: React.FC<SearchBarProps> = ({
   };
 
   return (
-    <div className="flex items-center pointer-events-auto bg-gray-200 rounded-full px-4 py-2 shadow-sm">
-      <FontAwesomeIcon
-        className="text-gray-500 text-lg mr-2"
-        icon={faMagnifyingGlass}
-      />
+    <div className="relative">
+      <div className="absolute inset-y-0 left-3 flex items-center pointer-events-none">
+        <Search className="h-4 w-4 text-gray-400" />
+      </div>
       <input
         type="text"
         value={inputValue}
         placeholder={placeholder}
-        className="flex-grow bg-transparent outline-none text-gray-700 placeholder-gray-500"
+        className="block w-full pl-10 pr-3 py-2 border border-gray-200 rounded-md text-sm placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
         onChange={handleChange}
       />
     </div>
