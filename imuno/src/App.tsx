@@ -59,125 +59,129 @@ function App() {
   }, []);
 
   // Adiciona Transformer de seleção
-  useEffect(() => {
-    console.log(stage?.getPointerPosition());
-    const tr = new Konva.Transformer();
-    layer.add(tr);
+ useEffect(() => {
+  const tr = new Konva.Transformer();
+  layer.add(tr);
 
-    const selectionRectangle = new Konva.Rect({
-      fill: "rgba(0,0,255,0.1)",
-      visible: false,
-      listening: false,
-    });
-    layer.add(selectionRectangle);
+  const selectionRectangle = new Konva.Rect({
+    fill: "rgba(0,0,255,0.1)",
+    visible: false,
+    listening: false,
+  });
+  layer.add(selectionRectangle);
 
-    let x1: number, y1: number, x2: number, y2: number;
-    let selecting = false;
+  let x1: number, y1: number, x2: number, y2: number;
+  let selecting = false;
 
-    if (stage) {
-      // Início da seleção (mouse ou toque)
-      stage.on("mousedown touchstart", (e) => {
-        if (e.target !== stage) return;
-        e.evt.preventDefault();
+  if (stage) {
+    // Início da seleção (mouse ou toque)
+    const startSelection = (e: Konva.KonvaEventObject<Event>) => {
+      if (e.target !== stage) return;
+      e.evt.preventDefault();
 
-        const pointerPos = stage.getPointerPosition();
-        if (pointerPos) {
-          x1 = pointerPos.x;
-          y1 = pointerPos.y;
-          x2 = x1;
-          y2 = y1;
+      const pointerPos = stage.getPointerPosition();
+      if (pointerPos) {
+        x1 = pointerPos.x;
+        y1 = pointerPos.y;
+        x2 = x1;
+        y2 = y1;
 
-          selectionRectangle.width(0);
-          selectionRectangle.height(0);
-          selectionRectangle.visible(true); // Mostra o retângulo de seleção
-          selecting = true;
-        }
-      });
+        selectionRectangle.width(0);
+        selectionRectangle.height(0);
+        selectionRectangle.visible(true);
+        selecting = true;
+      }
+    };
 
-      // Durante a movimentação do mouse (ou toque)
-      stage.on("mousemove touchmove", (e) => {
-        if (!selecting) return;
-        e.evt.preventDefault();
+    // Durante a movimentação do mouse (ou toque)
+    const updateSelection = (e: Konva.KonvaEventObject<Event>) => {
+      if (!selecting) return;
+      e.evt.preventDefault();
 
-        const pointerPos = stage.getPointerPosition();
-        if (pointerPos) {
-          x2 = pointerPos.x;
-          y2 = pointerPos.y;
-          selectionRectangle.setAttrs({
-            x: Math.min(x1, x2),
-            y: Math.min(y1, y2),
-            width: Math.abs(x2 - x1),
-            height: Math.abs(y2 - y1),
-          });
-        }
-      });
+      const pointerPos = stage.getPointerPosition();
+      if (pointerPos) {
+        x2 = pointerPos.x;
+        y2 = pointerPos.y;
+        selectionRectangle.setAttrs({
+          x: Math.min(x1, x2),
+          y: Math.min(y1, y2),
+          width: Math.abs(x2 - x1),
+          height: Math.abs(y2 - y1),
+        });
+      }
+    };
 
-      // Quando o mouse ou toque é liberado (fim da seleção)
-      stage.on("mouseup touchend", (e) => {
-        selecting = false;
-        if (!selectionRectangle.visible()) return;
-        e.evt.preventDefault();
+    // Quando o mouse ou toque é liberado (fim da seleção)
+    const endSelection = (e: Konva.KonvaEventObject<Event>) => {
+      selecting = false;
+      if (!selectionRectangle.visible()) return;
+      e.evt.preventDefault();
 
-        // Obtenha os shapes que estão dentro do retângulo de seleção
-        const shapes = stage.find(".selectable");
-        const box = selectionRectangle.getClientRect();
-        const selected = shapes.filter((shape) =>
-          Konva.Util.haveIntersection(box, shape.getClientRect())
-        );
+      // Obtenha os shapes que estão dentro do retângulo de seleção
+      const shapes = stage.find(".selectable");
+      const box = selectionRectangle.getClientRect();
+      const selected = shapes.filter((shape) =>
+        Konva.Util.haveIntersection(box, shape.getClientRect())
+      );
 
-        // Selecione as shapes que estão na área do retângulo
-        tr.nodes(selected);
-        selectionRectangle.visible(false);
-      });
+      tr.nodes(selected);
+      selectionRectangle.visible(false);
+    };
 
-      // Seleção individual com clique
-      stage.on("click tap", (e) => {
-        if (selectionRectangle.visible()) return;
+    // Seleção individual com clique
+    const handleClick = (e: Konva.KonvaEventObject<Event>) => {
+      if (selectionRectangle.visible()) return;
 
-        if (e.target === stage) {
-          tr.nodes([]); // Se clicar na área vazia, remova a seleção
-          return;
-        }
+      if (e.target === stage) {
+        tr.nodes([]);
+        return;
+      }
 
-        if (!e.target.hasName("selectable")) return;
+      if (!e.target.hasName("selectable")) return;
 
-        const metaPressed = e.evt.shiftKey || e.evt.ctrlKey || e.evt.metaKey;
-        const isSelected = tr.nodes().indexOf(e.target) >= 0;
+      const metaPressed = e.evt.shiftKey || e.evt.ctrlKey || e.evt.metaKey;
+      const isSelected = tr.nodes().includes(e.target);
 
-        if (!metaPressed && !isSelected) {
-          tr.nodes([e.target]); // Seleciona apenas este nó
-        } else if (metaPressed && isSelected) {
-          // Se a tecla modificadora (Shift, Ctrl ou Meta) estiver pressionada, desmarque o nó
-          const nodes = tr.nodes().slice();
-          nodes.splice(nodes.indexOf(e.target), 1);
-          tr.nodes(nodes);
-        } else if (metaPressed && !isSelected) {
-          // Adiciona o nó à seleção se a tecla modificadora estiver pressionada
-          const nodes = tr.nodes().concat([e.target]);
-          tr.nodes(nodes);
-        }
-      });
+      if (!metaPressed && !isSelected) {
+        tr.nodes([e.target]);
+      } else if (metaPressed && isSelected) {
+        tr.nodes(tr.nodes().filter((node) => node !== e.target));
+      } else if (metaPressed && !isSelected) {
+        tr.nodes([...tr.nodes(), e.target]);
+      }
+    };
 
-      // Evento de teclado para exclusão e desmarcação
-      document.addEventListener("keydown", (e) => {
-        e.preventDefault();
-        const keyPressed = e.key;
+    // Evento de teclado para exclusão e desmarcação
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === "Delete" || e.key === "Backspace") {
+        tr.nodes().forEach((node) => node.destroy());
+        tr.nodes([]);
+        layer.batchDraw();
+      }
+      if (e.key === "Escape") {
+        tr.nodes([]);
+      }
+    };
 
-        // Se a tecla pressionada for "Delete", exclui os nós selecionados
-        if (keyPressed === "Delete") {
-          tr.nodes().forEach((node) => {
-            node.destroy();
-          });
-          tr.nodes([]); // Limpa a seleção
-        }
+    stage.on("mousedown touchstart", startSelection);
+    stage.on("mousemove touchmove", updateSelection);
+    stage.on("mouseup touchend", endSelection);
+    stage.on("click tap", handleClick);
+    document.addEventListener("keydown", handleKeyDown);
 
-        // Se a tecla pressionada for "Escape", limpa a seleção
-        if (keyPressed === "Escape") {
-          tr.nodes([]); // Limpa a seleção
-        }
-      });
-    }
-  }, [stage, layer]);
+    return () => {
+      stage.off("mousedown touchstart", startSelection);
+      stage.off("mousemove touchmove", updateSelection);
+      stage.off("mouseup touchend", endSelection);
+      stage.off("click tap", handleClick);
+      document.removeEventListener("keydown", handleKeyDown);
+
+      tr.destroy();
+      selectionRectangle.destroy();
+    };
+  }
+}, [stage, layer]);
+
 
   // Efeito para controlar a visibilidade da régua
   useEffect(() => {
