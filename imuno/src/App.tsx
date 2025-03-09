@@ -7,6 +7,7 @@ import TopBar from "./components/TopBar/TopBar.component";
 import RightControls from "./components/RightControls/RightControls.component";
 import iconData from "./data/iconData";
 import svgCache from "./services/SvgCache";
+import { BathIcon } from "lucide-react";
 
 function App() {
   const [stage, setStage] = useState<Stage>();
@@ -29,159 +30,173 @@ function App() {
   const [isCropping, setIsCropping] = useState(false);
   const [cropRect, setCropRect] = useState<Konva.Rect | null>(null);
 
+  const bgRect = new Konva.Rect({
+    width: 720,
+    height: 720,
+    fill: "white",
+    name: "background-rect",
+  });
+
   useEffect(() => {
     const konvaStage = new Konva.Stage({
       container: "stage",
-      width: window.innerWidth - 320,
+      width: window.innerWidth - 300,
       height: window.innerHeight - 64,
     });
+
     const konvaLayer = new Konva.Layer();
-    const konvaBgLayer = new Konva.Layer();
-    konvaStage.add(konvaBgLayer);
+    konvaLayer.add(bgRect);
     konvaStage.add(konvaLayer);
+    konvaStage.add(bgLayer);
     setStage(konvaStage);
     setLayer(konvaLayer);
-    setBgLayer(konvaBgLayer);
 
-    // Garantir que o grid seja desenhado após a inicialização dos layers
-    setTimeout(() => {
-      addBG();
-    }, 0);
+    const centerBgRect = () => {
+      const stageWidth = konvaStage.width();
+      const stageHeight = konvaStage.height();
+
+      bgRect.x((stageWidth - bgRect.width()) / 2);
+      bgRect.y((stageHeight - bgRect.height()) / 2);
+
+      konvaStage.batchDraw();
+    };
+
+    centerBgRect();
 
     const handleResize = () => {
       konvaStage.width(window.innerWidth - 320);
       konvaStage.height(window.innerHeight - 64);
-      addBG();
+      centerBgRect();
     };
-
     window.addEventListener("resize", handleResize);
     return () => window.removeEventListener("resize", handleResize);
   }, []);
 
   // Adiciona Transformer de seleção
- useEffect(() => {
-  const tr = new Konva.Transformer();
-  layer.add(tr);
+  useEffect(() => {
+    const tr = new Konva.Transformer();
+    bgLayer.add(tr);
 
-  const selectionRectangle = new Konva.Rect({
-    fill: "rgba(0,0,255,0.1)",
-    visible: false,
-    listening: false,
-  });
-  layer.add(selectionRectangle);
+    const selectionRectangle = new Konva.Rect({
+      fill: "rgba(0,0,255,0.1)",
+      visible: false,
+      listening: false,
+    });
+    bgLayer.add(selectionRectangle);
 
-  let x1: number, y1: number, x2: number, y2: number;
-  let selecting = false;
+    let x1: number, y1: number, x2: number, y2: number;
+    let selecting = false;
 
-  if (stage) {
-    // Início da seleção (mouse ou toque)
-    const startSelection = (e: Konva.KonvaEventObject<Event>) => {
-      if (e.target !== stage) return;
-      e.evt.preventDefault();
+    if (stage) {
+      // Início da seleção (mouse ou toque)
+      const startSelection = (e: Konva.KonvaEventObject<Event>) => {
+        //if (e.target !== stage) {
+        //  return;
+        //}
+        e.evt.preventDefault();
 
-      const pointerPos = stage.getPointerPosition();
-      if (pointerPos) {
-        x1 = pointerPos.x;
-        y1 = pointerPos.y;
-        x2 = x1;
-        y2 = y1;
+        const pointerPos = stage.getPointerPosition();
+        if (pointerPos) {
+          x1 = pointerPos.x;
+          y1 = pointerPos.y;
+          x2 = x1;
+          y2 = y1;
 
-        selectionRectangle.width(0);
-        selectionRectangle.height(0);
-        selectionRectangle.visible(true);
-        selecting = true;
-      }
-    };
+          selectionRectangle.width(0);
+          selectionRectangle.height(0);
+          selectionRectangle.visible(true);
+          selecting = true;
+        }
+      };
 
-    // Durante a movimentação do mouse (ou toque)
-    const updateSelection = (e: Konva.KonvaEventObject<Event>) => {
-      if (!selecting) return;
-      e.evt.preventDefault();
+      // Durante a movimentação do mouse (ou toque)
+      const updateSelection = (e: Konva.KonvaEventObject<Event>) => {
+        if (!selecting) return;
+        e.evt.preventDefault();
 
-      const pointerPos = stage.getPointerPosition();
-      if (pointerPos) {
-        x2 = pointerPos.x;
-        y2 = pointerPos.y;
-        selectionRectangle.setAttrs({
-          x: Math.min(x1, x2),
-          y: Math.min(y1, y2),
-          width: Math.abs(x2 - x1),
-          height: Math.abs(y2 - y1),
-        });
-      }
-    };
+        const pointerPos = stage.getPointerPosition();
+        if (pointerPos) {
+          x2 = pointerPos.x;
+          y2 = pointerPos.y;
+          selectionRectangle.setAttrs({
+            x: Math.min(x1, x2),
+            y: Math.min(y1, y2),
+            width: Math.abs(x2 - x1),
+            height: Math.abs(y2 - y1),
+          });
+        }
+      };
 
-    // Quando o mouse ou toque é liberado (fim da seleção)
-    const endSelection = (e: Konva.KonvaEventObject<Event>) => {
-      selecting = false;
-      if (!selectionRectangle.visible()) return;
-      e.evt.preventDefault();
+      // Quando o mouse ou toque é liberado (fim da seleção)
+      const endSelection = (e: Konva.KonvaEventObject<Event>) => {
+        selecting = false;
+        if (!selectionRectangle.visible()) return;
+        e.evt.preventDefault();
 
-      // Obtenha os shapes que estão dentro do retângulo de seleção
-      const shapes = stage.find(".selectable");
-      const box = selectionRectangle.getClientRect();
-      const selected = shapes.filter((shape) =>
-        Konva.Util.haveIntersection(box, shape.getClientRect())
-      );
+        // Obtenha os shapes que estão dentro do retângulo de seleção
+        const shapes = stage.find(".selectable");
+        const box = selectionRectangle.getClientRect();
+        const selected = shapes.filter((shape) =>
+          Konva.Util.haveIntersection(box, shape.getClientRect())
+        );
 
-      tr.nodes(selected);
-      selectionRectangle.visible(false);
-    };
+        tr.nodes(selected);
+        selectionRectangle.visible(false);
+      };
 
-    // Seleção individual com clique
-    const handleClick = (e: Konva.KonvaEventObject<Event>) => {
-      if (selectionRectangle.visible()) return;
+      // Seleção individual com clique
+      const handleClick = (e: Konva.KonvaEventObject<Event>) => {
+        if (selectionRectangle.visible()) return;
 
-      if (e.target === stage) {
-        tr.nodes([]);
-        return;
-      }
+        if (e.target === stage) {
+          tr.nodes([]);
+          return;
+        }
 
-      if (!e.target.hasName("selectable")) return;
+        if (!e.target.hasName("selectable")) return;
 
-      const metaPressed = e.evt.shiftKey || e.evt.ctrlKey || e.evt.metaKey;
-      const isSelected = tr.nodes().includes(e.target);
+        const metaPressed = e.evt.shiftKey || e.evt.ctrlKey || e.evt.metaKey;
+        const isSelected = tr.nodes().includes(e.target);
 
-      if (!metaPressed && !isSelected) {
-        tr.nodes([e.target]);
-      } else if (metaPressed && isSelected) {
-        tr.nodes(tr.nodes().filter((node) => node !== e.target));
-      } else if (metaPressed && !isSelected) {
-        tr.nodes([...tr.nodes(), e.target]);
-      }
-    };
+        if (!metaPressed && !isSelected) {
+          tr.nodes([e.target]);
+        } else if (metaPressed && isSelected) {
+          tr.nodes(tr.nodes().filter((node) => node !== e.target));
+        } else if (metaPressed && !isSelected) {
+          tr.nodes([...tr.nodes(), e.target]);
+        }
+      };
 
-    // Evento de teclado para exclusão e desmarcação
-    const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key === "Delete" || e.key === "Backspace") {
-        tr.nodes().forEach((node) => node.destroy());
-        tr.nodes([]);
-        layer.batchDraw();
-      }
-      if (e.key === "Escape") {
-        tr.nodes([]);
-      }
-    };
+      // Evento de teclado para exclusão e desmarcação
+      const handleKeyDown = (e: KeyboardEvent) => {
+        if (e.key === "Delete" || e.key === "Backspace") {
+          tr.nodes().forEach((node) => node.destroy());
+          tr.nodes([]);
+          layer.batchDraw();
+        }
+        if (e.key === "Escape") {
+          tr.nodes([]);
+        }
+      };
 
-    stage.on("mousedown touchstart", startSelection);
-    stage.on("mousemove touchmove", updateSelection);
-    stage.on("mouseup touchend", endSelection);
-    stage.on("click tap", handleClick);
-    document.addEventListener("keydown", handleKeyDown);
+      stage.on("mousedown touchstart", startSelection);
+      stage.on("mousemove touchmove", updateSelection);
+      stage.on("mouseup touchend", endSelection);
+      stage.on("click tap", handleClick);
+      document.addEventListener("keydown", handleKeyDown);
 
-    return () => {
-      stage.off("mousedown touchstart", startSelection);
-      stage.off("mousemove touchmove", updateSelection);
-      stage.off("mouseup touchend", endSelection);
-      stage.off("click tap", handleClick);
-      document.removeEventListener("keydown", handleKeyDown);
+      return () => {
+        stage.off("mousedown touchstart", startSelection);
+        stage.off("mousemove touchmove", updateSelection);
+        stage.off("mouseup touchend", endSelection);
+        stage.off("click tap", handleClick);
+        document.removeEventListener("keydown", handleKeyDown);
 
-      tr.destroy();
-      selectionRectangle.destroy();
-    };
-  }
-}, [stage, layer]);
-
+        tr.destroy();
+        selectionRectangle.destroy();
+      };
+    }
+  }, [stage, layer]);
 
   // Efeito para controlar a visibilidade da régua
   useEffect(() => {
@@ -199,10 +214,10 @@ function App() {
 
   const updateCanvasColor = (color: string) => {
     setCanvasColor(color);
-    const bgRect = bgLayer.findOne(".background-rect");
+    const bgRect = layer.findOne(".background-rect");
     if (bgRect && bgRect instanceof Konva.Rect) {
       bgRect.fill(color);
-      bgLayer.batchDraw();
+      layer.batchDraw();
     }
   };
 
@@ -714,18 +729,18 @@ function App() {
   }, [isCropping]);
 
   const handleZoom = (direction: "in" | "out") => {
-    if (!stage) return;
+    if (!layer) return;
     const newScale = direction === "in" ? scale * 1.2 : scale / 1.2;
     setScale(newScale);
-    stage.scale({ x: newScale, y: newScale });
-    stage.batchDraw();
+    layer.scale({ x: newScale, y: newScale });
+    layer.batchDraw();
   };
 
   const handleZoomChange = (newScale: number) => {
-    if (!stage) return;
+    if (!layer) return;
     setScale(newScale);
-    stage.scale({ x: newScale, y: newScale });
-    stage.batchDraw();
+    layer.scale({ x: newScale, y: newScale });
+    layer.batchDraw();
   };
 
   const addRuler = () => {
@@ -986,18 +1001,7 @@ function App() {
   };
 
   const addBG = () => {
-    if (!bgLayer || !stage) return;
-
-    bgLayer.destroyChildren();
-    const rect = new Konva.Rect({
-      x: 0,
-      y: 0,
-      width: stage.width(),
-      height: stage.height(),
-      fill: canvasColor,
-      name: "background-rect",
-    });
-
+    if (!layer || !stage) return;
     if (gridVisible) {
       // Criar linhas verticais
       for (let i = 0; i < stage.width(); i += 20) {
@@ -1007,7 +1011,7 @@ function App() {
           strokeWidth: 1,
           name: "grid-line",
         });
-        bgLayer.add(line);
+        layer.add(line);
       }
 
       // Criar linhas horizontais
@@ -1018,13 +1022,12 @@ function App() {
           strokeWidth: 1,
           name: "grid-line",
         });
-        bgLayer.add(line);
+        layer.add(line);
       }
     }
 
-    bgLayer.add(rect);
-    rect.moveToBottom();
-    bgLayer.batchDraw();
+    layer.batchDraw();
+    layer.batchDraw();
   };
 
   const handleSaveClick = () => {
