@@ -67,7 +67,7 @@ function App() {
     tr.nodes();
 
     const selectionRectangle = new Konva.Rect({
-      fill: "rgba(0,0,255,0.5)",
+      fill: "rgba(0,0,255,0.1)",
       visible: false,
       listening: false,
     });
@@ -92,7 +92,7 @@ function App() {
         selecting = true;
       });
 
-      stage?.on("mousemove touchmove", (e) => {
+      stage.on("mousemove touchmove", (e) => {
         // não faz nada caso não tenha iniciado seleção
         if (!selecting) {
           return;
@@ -110,13 +110,13 @@ function App() {
       });
 
       stage.on("mouseup touchend", (e) => {
-        // do nothing if we didn't start selection
+        // não faz nada caso não tenha iniciado seleção
         selecting = false;
         if (!selectionRectangle.visible()) {
           return;
         }
         e.evt.preventDefault();
-        // update visibility in timeout, so we can check it in click event
+        // atualiza a visibilidade em timeout, para poder checar no click event
         selectionRectangle.visible(false);
         const shapes = stage.find(".selectable");
         const box = selectionRectangle.getClientRect();
@@ -126,43 +126,59 @@ function App() {
         tr.nodes(selected);
       });
 
-      // clicks should select/deselect shapes
+      // clicks devem selecionar/deselecionar nodes
       stage.on("click tap", function (e) {
-        // if we are selecting with rect, do nothing
+        // se estivermos selecionando - não faça nada
         if (selectionRectangle.visible()) {
           return;
         }
 
-        // if click on empty area - remove all selections
+        // se clicar em uma área vazia - remova todas as seleções
         if (e.target === stage) {
           tr.nodes([]);
           return;
         }
 
-        // do nothing if clicked NOT on our rectangles
+        // não faça nada se clicou fora de uma node
         if (!e.target.hasName("selectable")) {
           return;
         }
 
-        // do we pressed shift or ctrl?
+        // check de meta keys
         const metaPressed = e.evt.shiftKey || e.evt.ctrlKey || e.evt.metaKey;
         const isSelected = tr.nodes().indexOf(e.target) >= 0;
 
         if (!metaPressed && !isSelected) {
-          // if no key pressed and the node is not selected
-          // select just one
+          // se nenhuma tecla foi pressionada
+          // selecione apenas um
           tr.nodes([e.target]);
         } else if (metaPressed && isSelected) {
-          // if we pressed keys and node was selected
-          // we need to remove it from selection:
-          const nodes = tr.nodes().slice(); // use slice to have new copy of array
-          // remove node from array
+          // se pressionamos alguma tecla e havia um node seledionado
+          // remova o node da seleção
+          const nodes = tr.nodes().slice(); // slice para criar uma nova cópia do array
+          // remove node do array
           nodes.splice(nodes.indexOf(e.target), 1);
           tr.nodes(nodes);
         } else if (metaPressed && !isSelected) {
-          // add the node into selection
+          // adiciona node a seleção
           const nodes = tr.nodes().concat([e.target]);
           tr.nodes(nodes);
+        }
+      });
+      document.addEventListener("keydown", (e) => {
+        e.preventDefault();
+        const keyPressed = e.key; // a tecla pressionada
+
+        // verificar se a tecla pressionada é "Delete"
+        if (keyPressed === "Delete") {
+          tr.nodes().forEach((node) => {
+            node.destroy();
+          });
+          tr.nodes([]);
+          return;
+        } else if (keyPressed === "Escape") {
+          tr.nodes([]);
+          return;
         }
       });
     }
@@ -303,7 +319,6 @@ function App() {
       const clone = clipboard.clone();
       clone.x(clone.x() + 20);
       clone.y(clone.y() + 20);
-      addTransformer(clone);
       layer.add(clone);
       layer.draw();
       addHistory("add", clone);
@@ -865,7 +880,6 @@ function App() {
           height: 50,
           draggable: true,
         });
-        addTransformer(konvaImage);
         layer.add(konvaImage);
         layer.draw();
         addHistory("add", konvaImage);
@@ -878,53 +892,6 @@ function App() {
     const transformer = new Konva.Transformer({
       rotateEnabled: true,
       enabledAnchors: ["top", "left", "bottom", "right"],
-      borderStroke: "#0066cc",
-      anchorStroke: "#0066cc",
-      anchorFill: "#ffffff",
-      anchorSize: 8,
-      borderStrokeWidth: 1,
-    });
-
-    layer.add(transformer);
-
-    node.on("click", () => {
-      setSelectedNode(node);
-      transformer.nodes([node]);
-      layer.batchDraw();
-    });
-
-    stage?.on("click", (e) => {
-      if (e.target === stage) {
-        setSelectedNode(null);
-        transformer.detach();
-        layer.draw();
-      }
-    });
-
-    document.addEventListener("keydown", (e) => {
-      if (e.key === "Escape") {
-        setSelectedNode(null);
-        transformer.detach();
-        layer.draw();
-      } else if (e.key === "Delete" && !isLocked) {
-        const nodes = transformer.nodes();
-        nodes.forEach((n) => {
-          if (node === n) {
-            node.destroy();
-            transformer.destroy();
-            setSelectedNode(null);
-            addHistory("remove", node);
-          }
-        });
-        layer.draw();
-      }
-    });
-  };
-
-  const addTransformer = (node: Konva.Node) => {
-    const transformer = new Konva.Transformer({
-      rotateEnabled: true,
-      enabledAnchors: ["top-left", "top-right", "bottom-left", "bottom-right"],
       borderStroke: "#0066cc",
       anchorStroke: "#0066cc",
       anchorFill: "#ffffff",
@@ -1162,8 +1129,6 @@ function App() {
       //       // Define os pontos finais da seta
       //       arrow.points([startX, startY, endX, endY]);
 
-      //       // Adiciona controles de transformação à seta
-      //       addTransformer(arrow);
       //       // Registra a ação no histórico para permitir desfazer/refazer
       //       addHistory("add", arrow);
 
@@ -1271,9 +1236,6 @@ function App() {
           // Criar um editor de texto mais amigável
           createTextEditor(text, rect, textGroup!);
         });
-
-        // Adicionar transformador
-        addTransformer(textGroup);
 
         // Adicionar ao histórico
         addHistory("add", textGroup);
