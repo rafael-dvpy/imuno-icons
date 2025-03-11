@@ -1042,16 +1042,23 @@ function App() {
   };
 
   const handleSaveClick = () => {
-    const dataURL = layer?.toDataURL({
-      pixelRatio: 3,
-      x: bgRect.x(),
-      y: bgRect.y(),
-      width: bgRect.width(),
-      height: bgRect.height(),
-    });
-    if (dataURL) {
-      downloadURI(dataURL, "Your-Project-ImunoIcons.png");
-    }
+    setPreviewMode(true);
+
+    console.log(stage?.x());
+
+    setTimeout(() => {
+      const dataURL = layer?.toDataURL({
+        pixelRatio: 3,
+        x: bgRect.x() + stage.x(),
+        y: bgRect.y() + stage.y(),
+        width: bgRect.width(),
+        height: bgRect.height(),
+      });
+
+      if (dataURL) {
+        downloadURI(dataURL, "Your-Project-ImunoIcons.png");
+      }
+    }, 1);
   };
 
   const addArrow = () => {
