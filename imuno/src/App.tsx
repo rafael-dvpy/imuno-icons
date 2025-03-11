@@ -10,6 +10,9 @@ import svgCache from "./services/SvgCache";
 import { BathIcon } from "lucide-react";
 
 function App() {
+  const [transformer, setTransformer] = useState<Konva.Transformer | null>(
+    null
+  );
   const [stage, setStage] = useState<Stage>();
   const [layer, setLayer] = useState<Layer>(new Konva.Layer());
   const [bgLayer, setBgLayer] = useState<Layer>(new Konva.Layer());
@@ -78,6 +81,7 @@ function App() {
   // Adiciona Transformer de seleção
   useEffect(() => {
     const tr = new Konva.Transformer();
+    setTransformer(tr);
     bgLayer.add(tr);
 
     const selectionRectangle = new Konva.Rect({
@@ -243,6 +247,7 @@ function App() {
 
   // Efeito para atualizar o modo de preview
   useEffect(() => {
+    transformer?.nodes([]);
     if (previewMode) {
       // Esconde todos os transformers e âncoras
       stage?.find(".transformer").forEach((tr) => tr.hide());
