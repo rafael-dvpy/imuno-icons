@@ -1190,8 +1190,10 @@ function App() {
         if (cursorState != "addingText") {
           return;
         }
-        x = e.evt.offsetX;
-        y = e.evt.offsetY;
+        x = stage.getPointerPosition().x - stage.x();
+        y = stage.getPointerPosition().y - stage.y();
+
+        console.log(x, y);
 
         // Criar o grupo imediatamente para feedback visual
         textGroup = new Konva.Group({
@@ -1242,8 +1244,8 @@ function App() {
         if (!textGroup) return;
 
         // Calcular as novas dimensões com base na posição do mouse
-        const width = Math.max(100, e.evt.offsetX - x);
-        const height = Math.max(50, e.evt.offsetY - y);
+          const width = Math.max(100, (stage.getPointerPosition().x - x) - stage.x());
+        const height = Math.max(50, (stage.getPointerPosition().y - y) - stage.y());
 
         // Atualizar o retângulo
         const rect = textGroup.findOne("Rect") as Konva.Rect;
