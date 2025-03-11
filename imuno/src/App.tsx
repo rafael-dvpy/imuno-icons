@@ -29,23 +29,25 @@ function App() {
   const [scale, setScale] = useState(1);
   const [isCropping, setIsCropping] = useState(false);
   const [cropRect, setCropRect] = useState<Konva.Rect | null>(null);
-
-  const bgRect = new Konva.Rect({
-    width: 720,
-    height: 720,
-    fill: "white",
-    name: "background-rect",
-  });
+  const [bgRect, setBGRect] = useState<Konva.Rect | null>(null);
 
   useEffect(() => {
     const konvaStage = new Konva.Stage({
       container: "stage",
       width: window.innerWidth - 300,
       height: window.innerHeight - 64,
+      draggable: false, // Implementar depois
+    });
+
+    const rect = new Konva.Rect({
+      width: 720,
+      height: 720,
+      fill: "white",
+      name: "background-rect",
     });
 
     const konvaLayer = new Konva.Layer();
-    konvaLayer.add(bgRect);
+    konvaLayer.add(rect);
     konvaStage.add(konvaLayer);
     konvaStage.add(bgLayer);
     setStage(konvaStage);
@@ -55,9 +57,10 @@ function App() {
       const stageWidth = konvaStage.width();
       const stageHeight = konvaStage.height();
 
-      bgRect.x((stageWidth - bgRect.width()) / 2);
-      bgRect.y((stageHeight - bgRect.height()) / 2);
+      rect.x((stageWidth - rect.width()) / 2);
+      rect.y((stageHeight - rect.height()) / 2);
 
+      setBGRect(rect);
       konvaStage.batchDraw();
     };
 
@@ -78,7 +81,7 @@ function App() {
     bgLayer.add(tr);
 
     const selectionRectangle = new Konva.Rect({
-      fill: "rgba(0,0,255,0.1)",
+      fill: "rgba(0,0,255,0.2)",
       visible: false,
       listening: false,
     });
@@ -228,7 +231,14 @@ function App() {
 
   // Efeito para atualizar a visibilidade da grade
   useEffect(() => {
-    addBG();
+    if (gridVisible) {
+      addBG();
+    }
+
+    if (!gridVisible) {
+      stage?.find(".grid-line").forEach((line) => line.hide());
+      stage?.batchDraw();
+    }
   }, [gridVisible]);
 
   // Efeito para atualizar o modo de preview
@@ -280,6 +290,7 @@ function App() {
         container.classList.remove("preview-mode");
       }
     }
+
     stage?.batchDraw();
   }, [previewMode, gridVisible, rulerVisible]);
 
@@ -1031,7 +1042,13 @@ function App() {
   };
 
   const handleSaveClick = () => {
-    const dataURL = stage?.toDataURL({ pixelRatio: 3 });
+    const dataURL = layer?.toDataURL({
+      pixelRatio: 3,
+      x: bgRect.x(),
+      y: bgRect.y(),
+      width: bgRect.width(),
+      height: bgRect.height(),
+    });
     if (dataURL) {
       downloadURI(dataURL, "Your-Project-ImunoIcons.png");
     }
