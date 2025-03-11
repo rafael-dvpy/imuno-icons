@@ -330,18 +330,22 @@ function App() {
   };
 
   const handleCut = () => {
-    if (selectedNode && !isLocked) {
-      setClipboard(selectedNode.clone());
-      selectedNode.destroy();
-      layer.draw();
-      addHistory("cut", selectedNode);
-    }
+    transformer?.nodes().forEach((selectedNode) => {
+      if (selectedNode && !isLocked) {
+        setClipboard(selectedNode.clone());
+        selectedNode.destroy();
+        layer.draw();
+        addHistory("cut", selectedNode);
+      }
+    });
   };
 
   const handleCopy = () => {
-    if (selectedNode) {
-      setClipboard(selectedNode.clone());
-    }
+    transformer?.nodes().forEach((selectedNode) => {
+      if (selectedNode) {
+        setClipboard(selectedNode.clone());
+      }
+    });
   };
 
   const handlePaste = () => {
@@ -356,43 +360,53 @@ function App() {
   };
 
   const handleFlipHorizontal = () => {
-    if (selectedNode && !isLocked) {
-      selectedNode.scaleX(-selectedNode.scaleX());
-      layer.draw();
-      addHistory("transform", selectedNode);
-    }
+    transformer?.nodes().forEach((selectedNode) => {
+      if (selectedNode && !isLocked) {
+        selectedNode.scaleX(-selectedNode.scaleX());
+        layer.draw();
+        addHistory("transform", selectedNode);
+      }
+    });
   };
 
   const handleFlipVertical = () => {
-    if (selectedNode && !isLocked) {
-      selectedNode.scaleY(-selectedNode.scaleY());
-      layer.draw();
-      addHistory("transform", selectedNode);
-    }
+    transformer?.nodes().forEach((selectedNode) => {
+      if (selectedNode && !isLocked) {
+        selectedNode.scaleY(-selectedNode.scaleY());
+        layer.draw();
+        addHistory("transform", selectedNode);
+      }
+    });
   };
 
   const handleBringForward = () => {
-    if (selectedNode && !isLocked) {
-      selectedNode.moveUp();
-      layer.draw();
-      addHistory("arrange", selectedNode);
-    }
+    transformer?.nodes().forEach((selectedNode) => {
+      if (selectedNode && !isLocked) {
+        selectedNode.moveUp();
+        layer.draw();
+        addHistory("arrange", selectedNode);
+      }
+    });
   };
 
   const handleSendBackward = () => {
-    if (selectedNode && !isLocked) {
-      selectedNode.moveDown();
-      layer.draw();
-      addHistory("arrange", selectedNode);
-    }
+    transformer?.nodes().forEach((selectedNode) => {
+      if (selectedNode && !isLocked) {
+        selectedNode.moveDown();
+        layer.draw();
+        addHistory("arrange", selectedNode);
+      }
+    });
   };
 
   const handleLock = () => {
     setIsLocked(!isLocked);
-    if (selectedNode) {
-      selectedNode.draggable(!isLocked);
-      layer.draw();
-    }
+    transformer?.nodes().forEach((selectedNode) => {
+      if (selectedNode) {
+        selectedNode.draggable(!isLocked);
+        layer.draw();
+      }
+    });
   };
 
   const handleFavorite = () => {
@@ -401,280 +415,292 @@ function App() {
 
   const handleOpacityChange = (value: number) => {
     setOpacity(value);
-    if (selectedNode && !isLocked) {
-      selectedNode.opacity(value / 100);
-      layer.draw();
-      addHistory("opacity", selectedNode);
-    }
+    transformer?.nodes().forEach((selectedNode) => {
+      if (selectedNode && !isLocked) {
+        selectedNode.opacity(value / 100);
+        layer.draw();
+        addHistory("opacity", selectedNode);
+      }
+    });
   };
 
   const handleCrop = () => {
-    if (!selectedNode || !stage || isLocked) return;
+    transformer?.nodes().forEach((selectedNode) => {
+      if (!selectedNode || !stage || isLocked) return;
 
-    if (isCropping) {
-      // Finalizar o recorte
-      finishCrop();
-      return;
-    }
+      if (isCropping) {
+        // Finalizar o recorte
+        finishCrop();
+        return;
+      }
 
-    // Iniciar o recorte
-    setIsCropping(true);
+      // Iniciar o recorte
+      setIsCropping(true);
 
-    // Remover todos os transformers existentes antes de iniciar o recorte
-    stage.find("Transformer").forEach((tr) => {
-      tr.destroy();
+      // Remover todos os transformers existentes antes de iniciar o recorte
+      stage.find("Transformer").forEach((tr) => {
+        tr.destroy();
+      });
+
+      // Obter a posição e tamanho do nó selecionado
+      const nodeRect = selectedNode.getClientRect();
+
+      // Criar retângulo de recorte
+      const rect = new Konva.Rect({
+        x: nodeRect.x,
+        y: nodeRect.y,
+        width: nodeRect.width,
+        height: nodeRect.height,
+        stroke: "#0066cc",
+        strokeWidth: 2,
+        dash: [5, 5],
+        fill: "rgba(0, 102, 204, 0.1)",
+        draggable: true,
+        name: "crop-rect",
+      });
+
+      // Adicionar transformador ao retângulo de recorte
+      const transformer = new Konva.Transformer({
+        nodes: [rect],
+        rotateEnabled: false,
+        enabledAnchors: [
+          "top-left",
+          "top-right",
+          "bottom-left",
+          "bottom-right",
+        ],
+        borderStroke: "#0066cc",
+        anchorStroke: "#0066cc",
+        anchorFill: "#ffffff",
+        anchorSize: 8,
+        borderStrokeWidth: 1,
+        name: "crop-transformer",
+        boundBoxFunc: (oldBox, newBox) => {
+          // Limitar o retângulo de recorte à área do nó selecionado
+          if (
+            newBox.x < nodeRect.x ||
+            newBox.y < nodeRect.y ||
+            newBox.x + newBox.width > nodeRect.x + nodeRect.width ||
+            newBox.y + newBox.height > nodeRect.y + nodeRect.height
+          ) {
+            return oldBox;
+          }
+          return newBox;
+        },
+      });
+
+      layer.add(rect);
+      layer.add(transformer);
+      layer.draw();
+
+      setCropRect(rect);
     });
-
-    // Obter a posição e tamanho do nó selecionado
-    const nodeRect = selectedNode.getClientRect();
-
-    // Criar retângulo de recorte
-    const rect = new Konva.Rect({
-      x: nodeRect.x,
-      y: nodeRect.y,
-      width: nodeRect.width,
-      height: nodeRect.height,
-      stroke: "#0066cc",
-      strokeWidth: 2,
-      dash: [5, 5],
-      fill: "rgba(0, 102, 204, 0.1)",
-      draggable: true,
-      name: "crop-rect",
-    });
-
-    // Adicionar transformador ao retângulo de recorte
-    const transformer = new Konva.Transformer({
-      nodes: [rect],
-      rotateEnabled: false,
-      enabledAnchors: ["top-left", "top-right", "bottom-left", "bottom-right"],
-      borderStroke: "#0066cc",
-      anchorStroke: "#0066cc",
-      anchorFill: "#ffffff",
-      anchorSize: 8,
-      borderStrokeWidth: 1,
-      name: "crop-transformer",
-      boundBoxFunc: (oldBox, newBox) => {
-        // Limitar o retângulo de recorte à área do nó selecionado
-        if (
-          newBox.x < nodeRect.x ||
-          newBox.y < nodeRect.y ||
-          newBox.x + newBox.width > nodeRect.x + nodeRect.width ||
-          newBox.y + newBox.height > nodeRect.y + nodeRect.height
-        ) {
-          return oldBox;
-        }
-        return newBox;
-      },
-    });
-
-    layer.add(rect);
-    layer.add(transformer);
-    layer.draw();
-
-    setCropRect(rect);
   };
 
   const finishCrop = () => {
-    if (!selectedNode || !cropRect || !stage) return;
+    transformer?.nodes().forEach((selectedNode) => {
+      if (!selectedNode || !cropRect || !stage) return;
 
-    // Obter a posição e tamanho do retângulo de recorte
-    const cropBox = cropRect.getClientRect();
+      // Obter a posição e tamanho do retângulo de recorte
+      const cropBox = cropRect.getClientRect();
 
-    // Verificar se o nó selecionado é uma imagem
-    if (selectedNode.className === "Image") {
-      const image = selectedNode as Konva.Image;
-      const imageObj = image.image();
+      // Verificar se o nó selecionado é uma imagem
+      if (selectedNode.className === "Image") {
+        const image = selectedNode as Konva.Image;
+        const imageObj = image.image();
 
-      // Criar um canvas temporário para o recorte
-      const canvas = document.createElement("canvas");
-      const ctx = canvas.getContext("2d");
+        // Criar um canvas temporário para o recorte
+        const canvas = document.createElement("canvas");
+        const ctx = canvas.getContext("2d");
 
-      if (!ctx || !imageObj) {
-        cleanupCrop();
-        return;
-      }
-
-      // Verificar se o objeto de imagem é um HTMLImageElement
-      if (!(imageObj instanceof HTMLImageElement)) {
-        cleanupCrop();
-        return;
-      }
-
-      try {
-        // Calcular a proporção entre o tamanho da imagem original e o tamanho exibido
-        const scaleX = imageObj.naturalWidth / (image.width() * image.scaleX());
-        const scaleY =
-          imageObj.naturalHeight / (image.height() * image.scaleY());
-
-        // Calcular as coordenadas de recorte na imagem original
-        // Ajustar para considerar a posição e escala da imagem
-        const imgPos = image.getAbsolutePosition();
-        const imgRotation = image.rotation();
-
-        // Se a imagem estiver rotacionada, precisamos de uma abordagem diferente
-        if (imgRotation !== 0) {
-          // Para imagens rotacionadas, é mais complexo
-          // Vamos simplificar e apenas recortar a área visível
-
-          // Definir o tamanho do canvas para o tamanho do recorte
-          canvas.width = cropBox.width;
-          canvas.height = cropBox.height;
-
-          // Criar um novo stage temporário para renderizar apenas a parte recortada
-          const tempStage = new Konva.Stage({
-            container: document.createElement("div"),
-            width: cropBox.width,
-            height: cropBox.height,
-          });
-
-          const tempLayer = new Konva.Layer();
-          tempStage.add(tempLayer);
-
-          // Clonar a imagem e ajustar sua posição relativa ao recorte
-          const clonedImage = image.clone();
-          clonedImage.position({
-            x: image.x() - cropBox.x,
-            y: image.y() - cropBox.y,
-          });
-
-          tempLayer.add(clonedImage);
-          tempLayer.draw();
-
-          // Converter o stage temporário para uma URL de dados
-          const dataURL = tempStage.toDataURL({
-            x: 0,
-            y: 0,
-            width: cropBox.width,
-            height: cropBox.height,
-            pixelRatio: 2,
-          });
-
-          // Primeiro, limpar completamente o recorte e todas as seleções
+        if (!ctx || !imageObj) {
           cleanupCrop();
+          return;
+        }
 
-          // Criar uma nova imagem a partir da URL de dados
-          const newImage = new window.Image();
-          newImage.onload = () => {
-            // Atualizar a imagem existente
-            image.image(newImage);
-            image.width(cropBox.width / image.scaleX());
-            image.height(cropBox.height / image.scaleY());
-            image.position({
-              x: cropBox.x,
-              y: cropBox.y,
-            });
+        // Verificar se o objeto de imagem é um HTMLImageElement
+        if (!(imageObj instanceof HTMLImageElement)) {
+          cleanupCrop();
+          return;
+        }
 
-            // Atualizar o histórico
-            addHistory("crop", image);
+        try {
+          // Calcular a proporção entre o tamanho da imagem original e o tamanho exibido
+          const scaleX =
+            imageObj.naturalWidth / (image.width() * image.scaleX());
+          const scaleY =
+            imageObj.naturalHeight / (image.height() * image.scaleY());
 
-            // Recriar o transformer para a imagem recortada
-            createNewTransformer(image);
-          };
-          newImage.src = dataURL;
-        } else {
-          // Para imagens não rotacionadas, podemos usar o método original
           // Calcular as coordenadas de recorte na imagem original
-          const cropX = (cropBox.x - imgPos.x) * scaleX;
-          const cropY = (cropBox.y - imgPos.y) * scaleY;
-          const cropWidth = cropBox.width * scaleX;
-          const cropHeight = cropBox.height * scaleY;
+          // Ajustar para considerar a posição e escala da imagem
+          const imgPos = image.getAbsolutePosition();
+          const imgRotation = image.rotation();
 
-          // Definir o tamanho do canvas
-          canvas.width = cropWidth;
-          canvas.height = cropHeight;
+          // Se a imagem estiver rotacionada, precisamos de uma abordagem diferente
+          if (imgRotation !== 0) {
+            // Para imagens rotacionadas, é mais complexo
+            // Vamos simplificar e apenas recortar a área visível
 
-          // Desenhar a parte recortada da imagem no canvas
-          ctx.drawImage(
-            imageObj,
-            cropX,
-            cropY,
-            cropWidth,
-            cropHeight,
-            0,
-            0,
-            cropWidth,
-            cropHeight
-          );
+            // Definir o tamanho do canvas para o tamanho do recorte
+            canvas.width = cropBox.width;
+            canvas.height = cropBox.height;
 
-          // Primeiro, limpar completamente o recorte e todas as seleções
-          cleanupCrop();
-
-          // Criar uma nova imagem a partir do canvas
-          const newImage = new window.Image();
-          newImage.onload = () => {
-            // Atualizar a imagem existente
-            image.image(newImage);
-            image.width(cropBox.width / image.scaleX());
-            image.height(cropBox.height / image.scaleY());
-            image.position({
-              x: cropBox.x,
-              y: cropBox.y,
+            // Criar um novo stage temporário para renderizar apenas a parte recortada
+            const tempStage = new Konva.Stage({
+              container: document.createElement("div"),
+              width: cropBox.width,
+              height: cropBox.height,
             });
 
-            // Atualizar o histórico
-            addHistory("crop", image);
+            const tempLayer = new Konva.Layer();
+            tempStage.add(tempLayer);
 
-            // Recriar o transformer para a imagem recortada
-            createNewTransformer(image);
-          };
-          newImage.src = canvas.toDataURL();
+            // Clonar a imagem e ajustar sua posição relativa ao recorte
+            const clonedImage = image.clone();
+            clonedImage.position({
+              x: image.x() - cropBox.x,
+              y: image.y() - cropBox.y,
+            });
+
+            tempLayer.add(clonedImage);
+            tempLayer.draw();
+
+            // Converter o stage temporário para uma URL de dados
+            const dataURL = tempStage.toDataURL({
+              x: 0,
+              y: 0,
+              width: cropBox.width,
+              height: cropBox.height,
+              pixelRatio: 2,
+            });
+
+            // Primeiro, limpar completamente o recorte e todas as seleções
+            cleanupCrop();
+
+            // Criar uma nova imagem a partir da URL de dados
+            const newImage = new window.Image();
+            newImage.onload = () => {
+              // Atualizar a imagem existente
+              image.image(newImage);
+              image.width(cropBox.width / image.scaleX());
+              image.height(cropBox.height / image.scaleY());
+              image.position({
+                x: cropBox.x,
+                y: cropBox.y,
+              });
+
+              // Atualizar o histórico
+              addHistory("crop", image);
+
+              // Recriar o transformer para a imagem recortada
+              createNewTransformer(image);
+            };
+            newImage.src = dataURL;
+          } else {
+            // Para imagens não rotacionadas, podemos usar o método original
+            // Calcular as coordenadas de recorte na imagem original
+            const cropX = (cropBox.x - imgPos.x) * scaleX;
+            const cropY = (cropBox.y - imgPos.y) * scaleY;
+            const cropWidth = cropBox.width * scaleX;
+            const cropHeight = cropBox.height * scaleY;
+
+            // Definir o tamanho do canvas
+            canvas.width = cropWidth;
+            canvas.height = cropHeight;
+
+            // Desenhar a parte recortada da imagem no canvas
+            ctx.drawImage(
+              imageObj,
+              cropX,
+              cropY,
+              cropWidth,
+              cropHeight,
+              0,
+              0,
+              cropWidth,
+              cropHeight
+            );
+
+            // Primeiro, limpar completamente o recorte e todas as seleções
+            cleanupCrop();
+
+            // Criar uma nova imagem a partir do canvas
+            const newImage = new window.Image();
+            newImage.onload = () => {
+              // Atualizar a imagem existente
+              image.image(newImage);
+              image.width(cropBox.width / image.scaleX());
+              image.height(cropBox.height / image.scaleY());
+              image.position({
+                x: cropBox.x,
+                y: cropBox.y,
+              });
+
+              // Atualizar o histórico
+              addHistory("crop", image);
+
+              // Recriar o transformer para a imagem recortada
+              createNewTransformer(image);
+            };
+            newImage.src = canvas.toDataURL();
+          }
+        } catch (error) {
+          console.error("Erro ao recortar imagem:", error);
+          cleanupCrop();
         }
-      } catch (error) {
-        console.error("Erro ao recortar imagem:", error);
+      } else if (selectedNode.nodeType === "Group") {
+        try {
+          const group = selectedNode as Konva.Group;
+
+          // Obter a posição absoluta do grupo
+          const groupPos = group.getAbsolutePosition();
+
+          // Calcular a nova posição do grupo após o recorte
+          const newX = cropBox.x;
+          const newY = cropBox.y;
+
+          // Limpar o recorte e todas as seleções
+          cleanupCrop();
+
+          // Mover o grupo para a nova posição
+          group.position({
+            x: newX,
+            y: newY,
+          });
+
+          // Encontrar o retângulo dentro do grupo (para caixas de texto)
+          const rect = group.findOne("Rect") as Konva.Rect;
+          if (rect) {
+            // Redimensionar o retângulo
+            rect.width(cropBox.width / group.scaleX());
+            rect.height(cropBox.height / group.scaleY());
+          }
+
+          // Encontrar o texto dentro do grupo
+          const text = group.findOne("Text") as Konva.Text;
+          if (text) {
+            // Redimensionar o texto
+            text.width(cropBox.width / group.scaleX());
+            text.height(cropBox.height / group.scaleY());
+          }
+
+          // Atualizar o histórico
+          addHistory("crop", group);
+
+          // Atualizar a camada
+          layer.draw();
+
+          // Recriar o transformer para o grupo recortado
+          createNewTransformer(group);
+        } catch (error) {
+          console.error("Erro ao recortar grupo:", error);
+          cleanupCrop();
+        }
+      } else {
+        // Para outros tipos de nós, implementar conforme necessário
         cleanupCrop();
       }
-    } else if (selectedNode.nodeType === "Group") {
-      try {
-        const group = selectedNode as Konva.Group;
-
-        // Obter a posição absoluta do grupo
-        const groupPos = group.getAbsolutePosition();
-
-        // Calcular a nova posição do grupo após o recorte
-        const newX = cropBox.x;
-        const newY = cropBox.y;
-
-        // Limpar o recorte e todas as seleções
-        cleanupCrop();
-
-        // Mover o grupo para a nova posição
-        group.position({
-          x: newX,
-          y: newY,
-        });
-
-        // Encontrar o retângulo dentro do grupo (para caixas de texto)
-        const rect = group.findOne("Rect") as Konva.Rect;
-        if (rect) {
-          // Redimensionar o retângulo
-          rect.width(cropBox.width / group.scaleX());
-          rect.height(cropBox.height / group.scaleY());
-        }
-
-        // Encontrar o texto dentro do grupo
-        const text = group.findOne("Text") as Konva.Text;
-        if (text) {
-          // Redimensionar o texto
-          text.width(cropBox.width / group.scaleX());
-          text.height(cropBox.height / group.scaleY());
-        }
-
-        // Atualizar o histórico
-        addHistory("crop", group);
-
-        // Atualizar a camada
-        layer.draw();
-
-        // Recriar o transformer para o grupo recortado
-        createNewTransformer(group);
-      } catch (error) {
-        console.error("Erro ao recortar grupo:", error);
-        cleanupCrop();
-      }
-    } else {
-      // Para outros tipos de nós, implementar conforme necessário
-      cleanupCrop();
-    }
+    });
   };
 
   // Função para criar um novo transformer após o recorte
@@ -1048,9 +1074,8 @@ function App() {
 
   const handleSaveClick = () => {
     setPreviewMode(true);
-
-    console.log(stage?.x());
-
+    layer?.scale({ x: 1, y: 1 });
+    setScale(1);
     setTimeout(() => {
       const dataURL = layer?.toDataURL({
         pixelRatio: 3,
