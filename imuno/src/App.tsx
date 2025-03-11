@@ -45,7 +45,7 @@ function App() {
     const rect = new Konva.Rect({
       width: 720,
       height: 720,
-      fill: "white",
+      fill: "gray",
       name: "background-rect",
     });
 
@@ -94,18 +94,15 @@ function App() {
     let x1: number, y1: number, x2: number, y2: number;
     let selecting = false;
 
-    if (stage) {
+    if (stage && stage.draggable() == false) {
       // Início da seleção (mouse ou toque)
       const startSelection = (e: Konva.KonvaEventObject<Event>) => {
-        //if (e.target !== stage) {
-        //  return;
-        //}
         e.evt.preventDefault();
 
         const pointerPos = stage.getPointerPosition();
         if (pointerPos) {
-          x1 = pointerPos.x;
-          y1 = pointerPos.y;
+          x1 = pointerPos.x - stage.x();
+          y1 = pointerPos.y - stage.y();
           x2 = x1;
           y2 = y1;
 
@@ -123,8 +120,8 @@ function App() {
 
         const pointerPos = stage.getPointerPosition();
         if (pointerPos) {
-          x2 = pointerPos.x;
-          y2 = pointerPos.y;
+          x2 = pointerPos.x - stage.x();
+          y2 = pointerPos.y - stage.y();
           selectionRectangle.setAttrs({
             x: Math.min(x1, x2),
             y: Math.min(y1, y2),
@@ -201,6 +198,30 @@ function App() {
 
         tr.destroy();
         selectionRectangle.destroy();
+      };
+    }
+  }, [stage, layer]);
+
+  // torna stage arrastável
+  useEffect(() => {
+    if (stage) {
+      const handleKeyDown = (e: KeyboardEvent) => {
+        if (e.key === " ") {
+          stage.draggable(true);
+        }
+      };
+
+      const handleKeyUp = (e: KeyboardEvent) => {
+        if (e.key === " ") {
+          stage.draggable(false);
+        }
+      };
+
+      document.addEventListener("keydown", handleKeyDown);
+      document.addEventListener("keyup", handleKeyUp);
+      return () => {
+        document.removeEventListener("keydown", handleKeyDown);
+        document.removeEventListener("keyup", handleKeyUp);
       };
     }
   }, [stage, layer]);
@@ -1115,35 +1136,35 @@ function App() {
       layer.add(arrow);
       layer.batchDraw();
 
-      // // Atualiza a seta em tempo real enquanto o usuário move o mouse
-      // stage.on("mousemove", (e) => {
-      //   // Só atualiza se uma seta estiver sendo criada
-      //   if (arrow) {
-      //     const endX = e.evt.offsetX;
-      //     const endY = e.evt.offsetY;
+     //  // Atualiza a seta em tempo real enquanto o usuário move o mouse
+     //  stage.on("mousemove", (e) => {
+     //    // Só atualiza se uma seta estiver sendo criada
+     //    if (arrow) {
+     //      const endX = e.evt.offsetX;
+     //      const endY = e.evt.offsetY;
 
-      //     // Atualiza os pontos da seta para refletir a posição atual do cursor
-      //     arrow.points([startX, startY, endX, endY]);
-      //     layer.batchDraw();
-      //   }
-      // });
+     //      // Atualiza os pontos da seta para refletir a posição atual do cursor
+     //      arrow.points([startX, startY, endX, endY]);
+     //      layer.batchDraw();
+     //    }
+     //  });
 
-      //   // Finaliza a criação da seta quando o usuário solta o mouse
-      //   stage.on("mouseup", (e) => {
-      //     if (arrow) {
-      //       const endX = e.evt.offsetX;
-      //       const endY = e.evt.offsetY;
+     //    // Finaliza a criação da seta quando o usuário solta o mouse
+     //    stage.on("mouseup", (e) => {
+     //      if (arrow) {
+     //        const endX = e.evt.offsetX;
+     //        const endY = e.evt.offsetY;
 
-      //       // Define os pontos finais da seta
-      //       arrow.points([startX, startY, endX, endY]);
+     //        // Define os pontos finais da seta
+     //        arrow.points([startX, startY, endX, endY]);
 
-      //       // Registra a ação no histórico para permitir desfazer/refazer
-      //       addHistory("add", arrow);
+     //        // Registra a ação no histórico para permitir desfazer/refazer
+     //        addHistory("add", arrow);
 
-      //       // Remove os event listeners para evitar vazamentos de memória
-      //       cleanupEventListeners();
-      //     }
-      //   });
+     //        // Remove os event listeners para evitar vazamentos de memória
+     //        cleanupEventListeners();
+     //      }
+     //    });
     }
   };
 
