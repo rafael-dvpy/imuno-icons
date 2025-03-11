@@ -35,6 +35,10 @@ function App() {
   const [cropRect, setCropRect] = useState<Konva.Rect | null>(null);
   const [bgRect, setBGRect] = useState<Konva.Rect | null>(null);
 
+  const selectingCursorState = () => {
+    setCursorState("selecting");
+  };
+
   useEffect(() => {
     const konvaStage = new Konva.Stage({
       container: "stage",
@@ -201,7 +205,7 @@ function App() {
         selectionRectangle.destroy();
       };
     }
-  }, [stage, layer]);
+  }, [stage, layer, cursorState]);
 
   // torna stage arrastável
   useEffect(() => {
@@ -216,7 +220,7 @@ function App() {
       const handleKeyUp = (e: KeyboardEvent) => {
         if (e.key === " ") {
           stage.draggable(false);
-          setCursorState("selecting");
+          selectingCursorState();
         }
       };
 
@@ -227,7 +231,7 @@ function App() {
         document.removeEventListener("keyup", handleKeyUp);
       };
     }
-  }, [stage, layer]);
+  }, [stage, layer, cursorState]);
 
   // Efeito para controlar a visibilidade da régua
   useEffect(() => {
@@ -1172,67 +1176,66 @@ function App() {
   };
 
   const addRectWithText = () => {
+    setCursorState("addingText");
+    console.log(cursorState);
+  };
+
+  useEffect(() => {
     if (stage) {
       let x: number, y: number;
       let textGroup: Konva.Group | null = null;
 
-      const remove = () => {
-        stage.off("mousedown", handleMouseDown);
-        stage.off("mousemove", handleMouseMove);
-        stage.off("mouseup", handleMouseUp);
-        setCreating(false);
-      };
-
       const handleMouseDown = (e) => {
         // Ignorar se o clique não foi no palco
-        if (creating) {
-          x = e.evt.offsetX;
-          y = e.evt.offsetY;
-
-          // Criar o grupo imediatamente para feedback visual
-          textGroup = new Konva.Group({
-            x: x,
-            y: y,
-            name: "selectable",
-            draggable: true,
-            opacity: 0.8, // Inicialmente semi-transparente para indicar que está sendo criado
-          });
-
-          // Criar o retângulo de fundo
-          const rect = new Konva.Rect({
-            width: 200,
-            height: 100,
-            fill: "#EBF8FF",
-            stroke: "#4299E1",
-            strokeWidth: 1,
-            cornerRadius: 4,
-            shadowColor: "rgba(0,0,0,0.1)",
-            shadowBlur: 5,
-            shadowOffset: { x: 0, y: 2 },
-            shadowOpacity: 0.5,
-          });
-
-          // Criar o texto com placeholder
-          const text = new Konva.Text({
-            text: textContent || "Clique duplo para editar",
-            fontSize: 14,
-            fontFamily: "Inter, sans-serif",
-            fill: "#2D3748",
-            width: 200,
-            padding: 10,
-            align: "center",
-            verticalAlign: "middle",
-            height: 100,
-          });
-
-          // Adicionar elementos ao grupo
-          textGroup.add(rect);
-          textGroup.add(text);
-
-          // Adicionar o grupo à camada
-          layer.add(textGroup);
-          layer.batchDraw();
+        if (cursorState != "addingText") {
+          return;
         }
+        x = e.evt.offsetX;
+        y = e.evt.offsetY;
+
+        // Criar o grupo imediatamente para feedback visual
+        textGroup = new Konva.Group({
+          x: x,
+          y: y,
+          name: "selectable",
+          draggable: true,
+          opacity: 0.8, // Inicialmente semi-transparente para indicar que está sendo criado
+        });
+
+        // Criar o retângulo de fundo
+        const rect = new Konva.Rect({
+          width: 200,
+          height: 100,
+          fill: "#EBF8FF",
+          stroke: "#4299E1",
+          strokeWidth: 1,
+          cornerRadius: 4,
+          shadowColor: "rgba(0,0,0,0.1)",
+          shadowBlur: 5,
+          shadowOffset: { x: 0, y: 2 },
+          shadowOpacity: 0.5,
+        });
+
+        // Criar o texto com placeholder
+        const text = new Konva.Text({
+          text: textContent || "Clique duplo para editar",
+          fontSize: 14,
+          fontFamily: "Inter, sans-serif",
+          fill: "#2D3748",
+          width: 200,
+          padding: 10,
+          align: "center",
+          verticalAlign: "middle",
+          height: 100,
+        });
+
+        // Adicionar elementos ao grupo
+        textGroup.add(rect);
+        textGroup.add(text);
+
+        // Adicionar o grupo à camada
+        layer.add(textGroup);
+        layer.batchDraw();
       };
 
       const handleMouseMove = (e) => {
@@ -1274,15 +1277,21 @@ function App() {
         addHistory("add", textGroup);
 
         // Limpar os event listeners
-        remove();
+        selectingCursorState();
       };
 
       stage.on("mousedown", handleMouseDown);
       // Permitir redimensionar durante a criação
       stage.on("mousemove", handleMouseMove);
       stage.on("mouseup", handleMouseUp);
+
+      return () => {
+        stage.off("mousedown", handleMouseDown);
+        stage.off("mousemove", handleMouseMove);
+        stage.off("mouseup", handleMouseUp);
+      };
     }
-  };
+  }, [cursorState, stage, layer]);
 
   // Função para criar um editor de texto mais amigável
   const createTextEditor = (
