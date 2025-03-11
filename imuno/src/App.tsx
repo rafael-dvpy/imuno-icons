@@ -13,6 +13,7 @@ function App() {
   const [transformer, setTransformer] = useState<Konva.Transformer | null>(
     null
   );
+  const [cursorState, setCursorState] = useState("selecting");
   const [stage, setStage] = useState<Stage>();
   const [layer, setLayer] = useState<Layer>(new Konva.Layer());
   const [bgLayer, setBgLayer] = useState<Layer>(new Konva.Layer());
@@ -94,7 +95,7 @@ function App() {
     let x1: number, y1: number, x2: number, y2: number;
     let selecting = false;
 
-    if (stage && stage.draggable() == false) {
+    if (stage && cursorState === "selecting") {
       // Início da seleção (mouse ou toque)
       const startSelection = (e: Konva.KonvaEventObject<Event>) => {
         e.evt.preventDefault();
@@ -207,6 +208,7 @@ function App() {
     if (stage) {
       const handleKeyDown = (e: KeyboardEvent) => {
         if (e.key === " ") {
+          setCursorState("creating");
           stage.draggable(true);
         }
       };
@@ -214,6 +216,7 @@ function App() {
       const handleKeyUp = (e: KeyboardEvent) => {
         if (e.key === " ") {
           stage.draggable(false);
+          setCursorState("selecting");
         }
       };
 
@@ -1136,35 +1139,35 @@ function App() {
       layer.add(arrow);
       layer.batchDraw();
 
-     //  // Atualiza a seta em tempo real enquanto o usuário move o mouse
-     //  stage.on("mousemove", (e) => {
-     //    // Só atualiza se uma seta estiver sendo criada
-     //    if (arrow) {
-     //      const endX = e.evt.offsetX;
-     //      const endY = e.evt.offsetY;
+      //  // Atualiza a seta em tempo real enquanto o usuário move o mouse
+      //  stage.on("mousemove", (e) => {
+      //    // Só atualiza se uma seta estiver sendo criada
+      //    if (arrow) {
+      //      const endX = e.evt.offsetX;
+      //      const endY = e.evt.offsetY;
 
-     //      // Atualiza os pontos da seta para refletir a posição atual do cursor
-     //      arrow.points([startX, startY, endX, endY]);
-     //      layer.batchDraw();
-     //    }
-     //  });
+      //      // Atualiza os pontos da seta para refletir a posição atual do cursor
+      //      arrow.points([startX, startY, endX, endY]);
+      //      layer.batchDraw();
+      //    }
+      //  });
 
-     //    // Finaliza a criação da seta quando o usuário solta o mouse
-     //    stage.on("mouseup", (e) => {
-     //      if (arrow) {
-     //        const endX = e.evt.offsetX;
-     //        const endY = e.evt.offsetY;
+      //    // Finaliza a criação da seta quando o usuário solta o mouse
+      //    stage.on("mouseup", (e) => {
+      //      if (arrow) {
+      //        const endX = e.evt.offsetX;
+      //        const endY = e.evt.offsetY;
 
-     //        // Define os pontos finais da seta
-     //        arrow.points([startX, startY, endX, endY]);
+      //        // Define os pontos finais da seta
+      //        arrow.points([startX, startY, endX, endY]);
 
-     //        // Registra a ação no histórico para permitir desfazer/refazer
-     //        addHistory("add", arrow);
+      //        // Registra a ação no histórico para permitir desfazer/refazer
+      //        addHistory("add", arrow);
 
-     //        // Remove os event listeners para evitar vazamentos de memória
-     //        cleanupEventListeners();
-     //      }
-     //    });
+      //        // Remove os event listeners para evitar vazamentos de memória
+      //        cleanupEventListeners();
+      //      }
+      //    });
     }
   };
 
@@ -1174,64 +1177,65 @@ function App() {
       let textGroup: Konva.Group | null = null;
 
       const remove = () => {
-        stage.off("mousedown");
-        stage.off("mousemove");
-        stage.off("mouseup");
+        stage.off("mousedown", handleMouseDown);
+        stage.off("mousemove", handleMouseMove);
+        stage.off("mouseup", handleMouseUp);
+        setCreating(false);
       };
 
-      stage.on("mousedown", (e) => {
+      const handleMouseDown = (e) => {
         // Ignorar se o clique não foi no palco
-        if (e.target !== stage) return;
+        if (creating) {
+          x = e.evt.offsetX;
+          y = e.evt.offsetY;
 
-        x = e.evt.offsetX;
-        y = e.evt.offsetY;
+          // Criar o grupo imediatamente para feedback visual
+          textGroup = new Konva.Group({
+            x: x,
+            y: y,
+            name: "selectable",
+            draggable: true,
+            opacity: 0.8, // Inicialmente semi-transparente para indicar que está sendo criado
+          });
 
-        // Criar o grupo imediatamente para feedback visual
-        textGroup = new Konva.Group({
-          x: x,
-          y: y,
-          draggable: true,
-          opacity: 0.8, // Inicialmente semi-transparente para indicar que está sendo criado
-        });
+          // Criar o retângulo de fundo
+          const rect = new Konva.Rect({
+            width: 200,
+            height: 100,
+            fill: "#EBF8FF",
+            stroke: "#4299E1",
+            strokeWidth: 1,
+            cornerRadius: 4,
+            shadowColor: "rgba(0,0,0,0.1)",
+            shadowBlur: 5,
+            shadowOffset: { x: 0, y: 2 },
+            shadowOpacity: 0.5,
+          });
 
-        // Criar o retângulo de fundo
-        const rect = new Konva.Rect({
-          width: 200,
-          height: 100,
-          fill: "#EBF8FF",
-          stroke: "#4299E1",
-          strokeWidth: 1,
-          cornerRadius: 4,
-          shadowColor: "rgba(0,0,0,0.1)",
-          shadowBlur: 5,
-          shadowOffset: { x: 0, y: 2 },
-          shadowOpacity: 0.5,
-        });
+          // Criar o texto com placeholder
+          const text = new Konva.Text({
+            text: textContent || "Clique duplo para editar",
+            fontSize: 14,
+            fontFamily: "Inter, sans-serif",
+            fill: "#2D3748",
+            width: 200,
+            padding: 10,
+            align: "center",
+            verticalAlign: "middle",
+            height: 100,
+          });
 
-        // Criar o texto com placeholder
-        const text = new Konva.Text({
-          text: textContent || "Clique duplo para editar",
-          fontSize: 14,
-          fontFamily: "Inter, sans-serif",
-          fill: "#2D3748",
-          width: 200,
-          padding: 10,
-          align: "center",
-          verticalAlign: "middle",
-          height: 100,
-        });
+          // Adicionar elementos ao grupo
+          textGroup.add(rect);
+          textGroup.add(text);
 
-        // Adicionar elementos ao grupo
-        textGroup.add(rect);
-        textGroup.add(text);
+          // Adicionar o grupo à camada
+          layer.add(textGroup);
+          layer.batchDraw();
+        }
+      };
 
-        // Adicionar o grupo à camada
-        layer.add(textGroup);
-        layer.batchDraw();
-      });
-
-      // Permitir redimensionar durante a criação
-      stage.on("mousemove", (e) => {
+      const handleMouseMove = (e) => {
         if (!textGroup) return;
 
         // Calcular as novas dimensões com base na posição do mouse
@@ -1249,9 +1253,9 @@ function App() {
         text.height(height);
 
         layer.batchDraw();
-      });
+      };
 
-      stage.on("mouseup", () => {
+      const handleMouseUp = () => {
         if (!textGroup) return;
 
         // Finalizar a criação
@@ -1271,7 +1275,12 @@ function App() {
 
         // Limpar os event listeners
         remove();
-      });
+      };
+
+      stage.on("mousedown", handleMouseDown);
+      // Permitir redimensionar durante a criação
+      stage.on("mousemove", handleMouseMove);
+      stage.on("mouseup", handleMouseUp);
     }
   };
 
