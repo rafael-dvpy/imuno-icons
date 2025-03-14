@@ -74,14 +74,14 @@ export const cellularStructuresIcons: IconItem[] = [
   { id: "AscendingThinLimb", url: "/files/anatomy/Ascending Thin Limb of Loop of Henle.svg" },
 ];
 
-// Exportar todas as subcategorias como um objeto
+
 const anatomyIcons = {
-  organSystem: organSystemIcons,
-  skeletalSystem: skeletalSystemIcons,
-  reproductiveSystem: reproductiveSystemIcons,
-  circulatorySystem: circulatorySystemIcons,
-  lymphaticSystem: lymphaticSystemIcons,
-  cellularStructures: cellularStructuresIcons
+  "Organ System": organSystemIcons,
+  "Skeletal System": skeletalSystemIcons,
+  "Reproductive System": reproductiveSystemIcons,
+  "Circulatory System": circulatorySystemIcons,
+  "Lymphatic System": lymphaticSystemIcons,
+  "Cellular Structures": cellularStructuresIcons
 };
 
 export default anatomyIcons; 
