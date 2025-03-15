@@ -101,8 +101,11 @@ function App() {
 
     if (stage && cursorState === "selecting") {
       // Início da seleção (mouse ou toque)
-      const startSelection = (e: Konva.KonvaEventObject<Event>) => {
+      const startSelection = (e: Konva.KonvaEventObject<MouseEvent>) => {
         e.evt.preventDefault();
+        const metaPressed = e.evt.shiftKey || e.evt.ctrlKey || e.evt.metaKey;
+
+        if (metaPressed) { return }
 
         const pointerPos = stage.getPointerPosition();
         if (pointerPos) {
@@ -116,11 +119,16 @@ function App() {
           selectionRectangle.visible(true);
           selecting = true;
         }
+
+        stage.on("mousemove touchmove", updateSelection);
+        stage.on("mouseup touchend", endSelection);
       };
 
       // Durante a movimentação do mouse (ou toque)
-      const updateSelection = (e: Konva.KonvaEventObject<Event>) => {
+      const updateSelection = (e: Konva.KonvaEventObject<MouseEvent>) => {
         if (!selecting) return;
+        const metaPressed = e.evt.shiftKey || e.evt.ctrlKey || e.evt.metaKey;
+        if (metaPressed) { return }
         e.evt.preventDefault();
 
         const pointerPos = stage.getPointerPosition();
@@ -134,12 +142,15 @@ function App() {
             height: Math.abs(y2 - y1),
           });
         }
+
       };
 
       // Quando o mouse ou toque é liberado (fim da seleção)
-      const endSelection = (e: Konva.KonvaEventObject<Event>) => {
+      const endSelection = (e: Konva.KonvaEventObject<MouseEvent>) => {
         selecting = false;
         if (!selectionRectangle.visible()) return;
+        const metaPressed = e.evt.shiftKey || e.evt.ctrlKey || e.evt.metaKey;
+        if (metaPressed) { return }
         e.evt.preventDefault();
 
         // Obtenha os shapes que estão dentro do retângulo de seleção
@@ -154,7 +165,7 @@ function App() {
       };
 
       // Seleção individual com clique
-      const handleClick = (e: Konva.KonvaEventObject<Event>) => {
+      const handleClick = (e: Konva.KonvaEventObject<MouseEvent>) => {
         if (selectionRectangle.visible()) return;
 
         if (e.target === stage) {
@@ -189,8 +200,6 @@ function App() {
       };
 
       stage.on("mousedown touchstart", startSelection);
-      stage.on("mousemove touchmove", updateSelection);
-      stage.on("mouseup touchend", endSelection);
       stage.on("click tap", handleClick);
       document.addEventListener("keydown", handleKeyDown);
 
@@ -1244,7 +1253,7 @@ function App() {
         if (!textGroup) return;
 
         // Calcular as novas dimensões com base na posição do mouse
-          const width = Math.max(100, (stage.getPointerPosition().x - x) - stage.x());
+        const width = Math.max(100, (stage.getPointerPosition().x - x) - stage.x());
         const height = Math.max(50, (stage.getPointerPosition().y - y) - stage.y());
 
         // Atualizar o retângulo
@@ -1334,9 +1343,8 @@ function App() {
     textarea.style.left = `${areaPosition.x}px`;
     textarea.style.width = `${width}px`;
     textarea.style.height = `${height}px`;
-    textarea.style.fontSize = `${
-      textNode.fontSize() * group.scaleY() * stageScale
-    }px`;
+    textarea.style.fontSize = `${textNode.fontSize() * group.scaleY() * stageScale
+      }px`;
     textarea.style.border = "1px solid #4299E1";
     textarea.style.padding = `${textNode.padding() * stageScale}px`;
     textarea.style.margin = "0px";
