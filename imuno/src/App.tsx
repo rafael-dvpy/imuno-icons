@@ -45,6 +45,7 @@ function App() {
       width: window.innerWidth - 300,
       height: window.innerHeight - 64,
       draggable: false, // Implementar depois
+      id: "selectable"
     });
 
     const rect = new Konva.Rect({
@@ -52,6 +53,7 @@ function App() {
       height: 720,
       fill: "gray",
       name: "background-rect",
+      id: "selectable"
     });
 
     const konvaLayer = new Konva.Layer();
@@ -60,6 +62,7 @@ function App() {
     konvaStage.add(bgLayer);
     setStage(konvaStage);
     setLayer(konvaLayer);
+    setBGRect(rect);
 
     const centerBgRect = () => {
       const stageWidth = konvaStage.width();
@@ -102,6 +105,7 @@ function App() {
     if (stage && cursorState === "selecting") {
       // Início da seleção (mouse ou toque)
       const startSelection = (e: Konva.KonvaEventObject<MouseEvent>) => {
+        if (e.target.attrs.id != "selectable") return;
         e.evt.preventDefault();
         const metaPressed = e.evt.shiftKey || e.evt.ctrlKey || e.evt.metaKey;
 
@@ -216,18 +220,19 @@ function App() {
     }
   }, [stage, layer, cursorState]);
 
+
   // torna stage arrastável
   useEffect(() => {
     if (stage) {
       const handleKeyDown = (e: KeyboardEvent) => {
-        if (e.key === " ") {
+        if (e.key == " ") {
           setCursorState("creating");
           stage.draggable(true);
         }
       };
 
       const handleKeyUp = (e: KeyboardEvent) => {
-        if (e.key === " ") {
+        if (e.key == " ") {
           stage.draggable(false);
           selectingCursorState();
         }
@@ -347,7 +352,7 @@ function App() {
     if (historyPointer >= 0) {
       const previousAction = history[historyPointer];
       if (previousAction.action === "add") {
-        previousAction.data.destroy();
+        previousAction.data.konvaImage.destroy();
         layer.draw();
       }
       setHistoryPointer(historyPointer - 1);
@@ -359,7 +364,7 @@ function App() {
       const nextAction = history[historyPointer + 1];
       if (nextAction.action === "add") {
         const shape = nextAction.data;
-        layer.add(shape);
+        addSvg(shape.x, shape.y, shape.svg)
         layer.draw();
       }
       setHistoryPointer(historyPointer + 1);
@@ -942,7 +947,7 @@ function App() {
 
           layer.add(konvaImage);
           layer.draw();
-          addHistory("add", konvaImage);
+          addHistory("add", { konvaImage, x, y, svg });
         };
 
         image.onerror = () => {
@@ -975,7 +980,7 @@ function App() {
         });
         layer.add(konvaImage);
         layer.draw();
-        addHistory("add", konvaImage);
+        addHistory("add", { konvaImage, x, y, svg });
       };
       image.src = svg;
     }
@@ -1284,9 +1289,6 @@ function App() {
           createTextEditor(text, rect, textGroup!);
         });
 
-        // Adicionar ao histórico
-        addHistory("add", textGroup);
-
         // Limpar os event listeners
         selectingCursorState();
       };
@@ -1393,7 +1395,6 @@ function App() {
       layer.draw();
 
       // Adicionar ao histórico
-      addHistory("edit", group);
 
       // Remover os event listeners
       window.removeEventListener("click", handleOutsideClick);
