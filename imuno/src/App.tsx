@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import Konva from "konva";
 import { Stage } from "konva/lib/Stage";
 import { Layer } from "konva/lib/Layer";
@@ -10,6 +10,7 @@ import svgCache from "./services/SvgCache";
 import { BathIcon } from "lucide-react";
 
 function App() {
+
   const [transformer, setTransformer] = useState<Konva.Transformer | null>(
     null
   );
@@ -19,8 +20,8 @@ function App() {
   const [bgLayer, setBgLayer] = useState<Layer>(new Konva.Layer());
   const [selectedShape, setSelectedShape] = useState<string>();
   const [textContent, setTextContent] = useState<string>("");
-  const [history, setHistory] = useState<any[]>([]);
-  const [historyPointer, setHistoryPointer] = useState<number>(-1);
+  const history = useRef<{ action: string, data: any }[]>([]);
+  const historyStep = useRef(0);
   const [clipboard, setClipboard] = useState<any>(null);
   const [opacity, setOpacity] = useState<number>(100);
   const [isLocked, setIsLocked] = useState<boolean>(false);
@@ -194,7 +195,8 @@ function App() {
       // Evento de teclado para exclusão e desmarcação
       const handleKeyDown = (e: KeyboardEvent) => {
         if (e.key === "Delete" || e.key === "Backspace") {
-          tr.nodes().forEach((node) => node.destroy());
+          addHistory("delete", { nodes: tr.nodes() })
+          tr.nodes().forEach((node) => node.remove());
           tr.nodes([]);
           layer.batchDraw();
         }
@@ -214,8 +216,8 @@ function App() {
         stage.off("click tap", handleClick);
         document.removeEventListener("keydown", handleKeyDown);
 
-        tr.destroy();
-        selectionRectangle.destroy();
+        tr.remove();
+        selectionRectangle.remove();
       };
     }
   }, [stage, layer, cursorState]);
@@ -254,7 +256,7 @@ function App() {
     } else {
       stage?.children?.forEach((layer) => {
         if (layer.name() === "ruler-layer") {
-          layer.destroy();
+          layer.remove();
         }
       });
       stage?.batchDraw();
@@ -342,42 +344,76 @@ function App() {
   }, [previewMode, gridVisible, rulerVisible]);
 
   const addHistory = (action: string, data: any) => {
-    const newHistory = history.slice(0, historyPointer + 1);
-    newHistory.push({ action, data });
-    setHistory(newHistory);
-    setHistoryPointer(newHistory.length - 1);
+    history.current = history.current.slice(0, historyStep.current + 1);
+    history.current = history.current.concat([{ action, data }])
+    historyStep.current += 1
+
+    console.log(history.current, historyStep.current)
   };
 
   const undo = () => {
-    if (historyPointer >= 0) {
-      const previousAction = history[historyPointer];
-      if (previousAction.action === "add") {
-        previousAction.data.konvaImage.destroy();
-        layer.draw();
-      }
-      setHistoryPointer(historyPointer - 1);
+    if (historyStep.current === 0) {
+      return;
     }
+    historyStep.current -= 1
+    const previousAction = history.current[historyStep.current];
+
+    if (previousAction.action === "add") {
+      previousAction.data.remove();
+      layer.draw();
+    }
+
+    if (previousAction.action === "delete") {
+      previousAction.data.nodes.forEach(node => {
+        layer.add(node)
+        layer.draw();
+      })
+    }
+
+    if (previousAction.action === "movement") {
+      previousAction.data.forEach(node => {
+        const coords = node.coords
+        const konvaImage = node.konvaImage
+        konvaImage.x(coords.x)
+        konvaImage.y(coords.y)
+      })
+    };
+
   };
 
   const redo = () => {
-    if (historyPointer < history.length - 1) {
-      const nextAction = history[historyPointer + 1];
-      if (nextAction.action === "add") {
-        const shape = nextAction.data;
-        addSvg(shape.x, shape.y, shape.svg)
-        layer.draw();
-      }
-      setHistoryPointer(historyPointer + 1);
+    if (historyStep.current === history.current.length) {
+      return;
     }
+    const nextAction = history.current[historyStep.current];
+    historyStep.current += 1;
+
+    const shape = nextAction.data;
+    if (nextAction.action === "add") {
+      layer.add(shape)
+      layer.draw();
+    }
+
+    if (nextAction.action === "delete") {
+      nextAction.data.nodes.forEach(node => node.remove())
+    };
+
+    if (nextAction.action === "movement") {
+      nextAction.data.forEach(node => {
+        const coords = node.coords
+        const konvaImage = node.konvaImage
+        konvaImage.x(coords.end_x)
+        konvaImage.y(coords.end_y)
+      })
+    };
   };
 
   const handleCut = () => {
     transformer?.nodes().forEach((selectedNode) => {
       if (selectedNode && !isLocked) {
         setClipboard(selectedNode.clone());
-        selectedNode.destroy();
+        selectedNode.remove();
         layer.draw();
-        addHistory("cut", selectedNode);
       }
     });
   };
@@ -397,7 +433,6 @@ function App() {
       clone.y(clone.y() + 20);
       layer.add(clone);
       layer.draw();
-      addHistory("add", clone);
     }
   };
 
@@ -406,7 +441,6 @@ function App() {
       if (selectedNode && !isLocked) {
         selectedNode.scaleX(-selectedNode.scaleX());
         layer.draw();
-        addHistory("transform", selectedNode);
       }
     });
   };
@@ -416,7 +450,6 @@ function App() {
       if (selectedNode && !isLocked) {
         selectedNode.scaleY(-selectedNode.scaleY());
         layer.draw();
-        addHistory("transform", selectedNode);
       }
     });
   };
@@ -426,7 +459,6 @@ function App() {
       if (selectedNode && !isLocked) {
         selectedNode.moveUp();
         layer.draw();
-        addHistory("arrange", selectedNode);
       }
     });
   };
@@ -436,7 +468,6 @@ function App() {
       if (selectedNode && !isLocked) {
         selectedNode.moveDown();
         layer.draw();
-        addHistory("arrange", selectedNode);
       }
     });
   };
@@ -461,7 +492,6 @@ function App() {
       if (selectedNode && !isLocked) {
         selectedNode.opacity(value / 100);
         layer.draw();
-        addHistory("opacity", selectedNode);
       }
     });
   };
@@ -481,7 +511,7 @@ function App() {
 
       // Remover todos os transformers existentes antes de iniciar o recorte
       stage.find("Transformer").forEach((tr) => {
-        tr.destroy();
+        tr.remove();
       });
 
       // Obter a posição e tamanho do nó selecionado
@@ -632,7 +662,6 @@ function App() {
               });
 
               // Atualizar o histórico
-              addHistory("crop", image);
 
               // Recriar o transformer para a imagem recortada
               createNewTransformer(image);
@@ -679,7 +708,6 @@ function App() {
               });
 
               // Atualizar o histórico
-              addHistory("crop", image);
 
               // Recriar o transformer para a imagem recortada
               createNewTransformer(image);
@@ -727,7 +755,6 @@ function App() {
           }
 
           // Atualizar o histórico
-          addHistory("crop", group);
 
           // Atualizar a camada
           layer.draw();
@@ -777,18 +804,18 @@ function App() {
 
     // Remover todos os retângulos de recorte
     stage.find(".crop-rect").forEach((node) => {
-      node.destroy();
+      node.remove();
     });
 
     // Remover todos os transformers de recorte
     stage.find(".crop-transformer").forEach((tr) => {
-      tr.destroy();
+      tr.remove();
     });
 
     // Remover todos os transformers regulares para evitar duplicatas
     stage.find("Transformer").forEach((tr) => {
       if (tr.name() !== "crop-transformer") {
-        tr.destroy();
+        tr.remove();
       }
     });
 
@@ -833,7 +860,7 @@ function App() {
     // Remove existing ruler layer if any
     stage.children?.forEach((layer) => {
       if (layer.name() === "ruler-layer") {
-        layer.destroy();
+        layer.remove();
       }
     });
 
@@ -932,7 +959,7 @@ function App() {
         const image = new window.Image();
         image.onload = () => {
           // Remover o texto de carregamento
-          loadingText.destroy();
+          loadingText.remove();
 
           // Criar a imagem Konva
           const konvaImage = new Konva.Image({
@@ -945,9 +972,10 @@ function App() {
             draggable: true,
           });
 
+
           layer.add(konvaImage);
           layer.draw();
-          addHistory("add", { konvaImage, x, y, svg });
+          addHistory("add", { konvaImage, src: svg });
         };
 
         image.onerror = () => {
@@ -958,7 +986,7 @@ function App() {
 
           // Remover a mensagem após alguns segundos
           setTimeout(() => {
-            loadingText.destroy();
+            loadingText.remove();
             layer.draw();
           }, 3000);
         };
@@ -978,9 +1006,34 @@ function App() {
           height: 50,
           draggable: true,
         });
+
+        let coords: { x: number, y: number, end_x: number, end_y: number }
+
+        konvaImage.on("dragstart", () => {
+          coords = {
+            x: konvaImage.x(),
+            y: konvaImage.y(),
+            end_x: konvaImage.x(),
+            end_y: konvaImage.y()
+          }
+
+        }
+        )
+
+        konvaImage.on("dragend", () => {
+          coords = {
+            ...coords,
+            end_x: konvaImage.x(),
+            end_y: konvaImage.y()
+          }
+          addHistory("movement", [{ konvaImage, coords }])
+        }
+        )
+
+
         layer.add(konvaImage);
         layer.draw();
-        addHistory("add", { konvaImage, x, y, svg });
+        addHistory("add", konvaImage);
       };
       image.src = svg;
     }
