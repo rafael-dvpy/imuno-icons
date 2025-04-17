@@ -1,7 +1,7 @@
 import React from 'react';
 import { 
   ArrowRight, Type, Save, Undo2, Redo2, 
-  Scissors, Copy, FlipHorizontal, FlipVertical, 
+  Scissors, Copy, Clipboard, FlipHorizontal, FlipVertical, 
   Lock, Star, Layers, Crop, 
   ChevronUp, ChevronDown
 } from 'lucide-react';
@@ -84,6 +84,13 @@ const TopBar: React.FC<TopBarProps> = ({
         >
           <Copy className="h-4 w-4 mr-2" />
           Copy
+        </button>
+        <button
+          className="inline-flex items-center px-3 py-2 border border-gray-200 rounded-md text-sm font-medium text-gray-700 bg-white hover:bg-gray-50"
+          onClick={onPaste}
+        >
+          <Clipboard className="h-4 w-4 mr-2" />
+          Paste
         </button>
 
         <div className="h-6 w-px bg-gray-200 mx-2" />
