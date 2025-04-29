@@ -8,6 +8,7 @@ import RightControls from "./components/RightControls/RightControls.component";
 import iconData from "./data/iconData";
 import svgCache from "./services/SvgCache";
 import { BathIcon } from "lucide-react";
+import Notification from './components/Notification/Notification.component';
 
 function App() {
 
@@ -35,6 +36,11 @@ function App() {
   const [isCropping, setIsCropping] = useState(false);
   const [cropRect, setCropRect] = useState<Konva.Rect | null>(null);
   const [bgRect, setBGRect] = useState<Konva.Rect | null>(null);
+  const [notifications, setNotifications] = useState<{
+    id: string;
+    message: string;
+    type: 'success' | 'error' | 'info';
+  }[]>([]);
 
   const selectingCursorState = () => {
     setCursorState("selecting");
@@ -222,19 +228,18 @@ function App() {
     }
   }, [stage, layer, cursorState]);
 
-
   // torna stage arrastável
   useEffect(() => {
     if (stage) {
       const handleKeyDown = (e: KeyboardEvent) => {
-        if (e.key == " ") {
+        if (e.key === " ") {
           setCursorState("creating");
           stage.draggable(true);
         }
       };
 
       const handleKeyUp = (e: KeyboardEvent) => {
-        if (e.key == " ") {
+        if (e.key === " ") {
           stage.draggable(false);
           selectingCursorState();
         }
@@ -408,31 +413,82 @@ function App() {
     };
   };
 
-  const handleCut = () => {
-    transformer?.nodes().forEach((selectedNode) => {
-      if (selectedNode && !isLocked) {
-        setClipboard(selectedNode.clone());
-        selectedNode.remove();
-        layer.draw();
-      }
-    });
+  // Funções internas que realizam as operações sem mostrar notificações
+  const handleCopyInternal = () => {
+    const nodes = transformer?.nodes();
+    if (nodes && nodes.length > 0) {
+      setClipboard(nodes[0].clone());
+      return true;
+    }
+    return false;
   };
 
-  const handleCopy = () => {
-    transformer?.nodes().forEach((selectedNode) => {
-      if (selectedNode) {
-        setClipboard(selectedNode.clone());
+  const handleCutInternal = () => {
+    const nodes = transformer?.nodes();
+    if (nodes && nodes.length > 0 && !isLocked) {
+      setClipboard(nodes[0].clone());
+      nodes[0].remove();
+      layer.draw();
+      return true;
+    }
+    return false;
+  };
+
+  const handlePasteInternal = () => {
+    if (clipboard && layer) {
+      const clone = clipboard.clone();
+      
+      // Deslocar a posição para ficar visível que é um novo item
+      clone.x(clone.x() + 20);
+      clone.y(clone.y() + 20);
+      
+      // Adicionar à camada
+      layer.add(clone);
+      
+      // Selecionar o item colado com o transformer
+      if (transformer) {
+        transformer.nodes([clone]);
+        transformer.moveToTop();
       }
-    });
+      
+      // Adicionar ao histórico
+      addHistory("add", clone);
+      
+      // Renderizar
+      layer.batchDraw();
+      
+      return true;
+    }
+    return false;
+  };
+
+  // Funções para a interface do usuário que chamam as funções internas e mostram notificações
+  const handleCopy = () => {
+    const success = handleCopyInternal();
+    if (success) {
+      showNotification("Item copiado para a área de transferência", "success");
+    } else {
+      showNotification("Nenhum item selecionado para copiar", "error");
+    }
+  };
+
+  const handleCut = () => {
+    const success = handleCutInternal();
+    if (success) {
+      showNotification("Item recortado para a área de transferência", "success");
+    } else if (isLocked) {
+      showNotification("Não é possível recortar itens bloqueados", "error");
+    } else {
+      showNotification("Nenhum item selecionado para recortar", "error");
+    }
   };
 
   const handlePaste = () => {
-    if (clipboard) {
-      const clone = clipboard.clone();
-      clone.x(clone.x() + 20);
-      clone.y(clone.y() + 20);
-      layer.add(clone);
-      layer.draw();
+    const success = handlePasteInternal();
+    if (success) {
+      showNotification("Item colado com sucesso", "success");
+    } else {
+      showNotification("Nada para colar. Copie um item primeiro.", "info");
     }
   };
 
@@ -1516,6 +1572,134 @@ function App() {
     preloadCommonSvgs();
   }, []);
 
+  useEffect(() => {
+    // Manipulador para eventos de paste do navegador
+    const handleSystemPaste = (e: ClipboardEvent) => {
+      if (!stage) return;
+      
+      // Verificar se há imagens na área de transferência
+      const items = e.clipboardData?.items;
+      if (!items) return;
+      
+      for (let i = 0; i < items.length; i++) {
+        if (items[i].type.indexOf('image') !== -1) {
+          // Bloquear a ação padrão do navegador
+          e.preventDefault();
+          
+          // Obter o arquivo de imagem
+          const blob = items[i].getAsFile();
+          if (!blob) continue;
+          
+          // Criar URL para o blob
+          const url = URL.createObjectURL(blob);
+          
+          // Carregar a imagem
+          const img = new window.Image();
+          img.onload = () => {
+            // Obter a posição do stage para colocar a imagem no centro
+            const stagePos = stage.getPointerPosition() || { x: stage.width() / 2, y: stage.height() / 2 };
+            
+            // Criar imagem Konva
+            const konvaImage = new Konva.Image({
+              x: stagePos.x - img.width / 4,  // Dividir por 4 para dimensionar para 50%
+              y: stagePos.y - img.height / 4,
+              image: img,
+              width: img.width / 2,
+              height: img.height / 2,
+              name: "selectable",
+              draggable: true,
+            });
+            
+            // Adicionar à camada
+            layer.add(konvaImage);
+            
+            // Selecionar a imagem recém-adicionada
+            if (transformer) {
+              transformer.nodes([konvaImage]);
+            }
+            
+            // Adicionar ao histórico
+            addHistory("add", konvaImage);
+            
+            layer.draw();
+            
+            // Limpar o URL do objeto
+            URL.revokeObjectURL(url);
+          };
+          
+          img.src = url;
+        }
+      }
+    };
+    
+    // Adicionar evento de paste
+    document.addEventListener('paste', handleSystemPaste);
+    
+    return () => {
+      // Remover evento ao desmontar
+      document.removeEventListener('paste', handleSystemPaste);
+    };
+  }, [stage, layer, transformer]);
+
+  // Função para adicionar notificação
+  const showNotification = (message: string, type: 'success' | 'error' | 'info' = 'info') => {
+    const id = Date.now().toString();
+    setNotifications(prev => [...prev, { id, message, type }]);
+  };
+
+  // Função para remover notificação
+  const removeNotification = (id: string) => {
+    setNotifications(prev => prev.filter(notification => notification.id !== id));
+  };
+
+  // Adicione estas refs após a definição das funções
+  const handleCopyRef = useRef(handleCopy);
+  const handleCutRef = useRef(handleCut);
+  const handlePasteRef = useRef(handlePaste);
+
+  // Atualize as funções quando elas mudarem
+  useEffect(() => {
+    handleCopyRef.current = handleCopy;
+    handleCutRef.current = handleCut;
+    handlePasteRef.current = handlePaste;
+  }, [handleCopy, handleCut, handlePaste]);
+
+  // Use as refs no useEffect dos atalhos
+  useEffect(() => {
+    const handleKeyboardShortcuts = (e: KeyboardEvent) => {
+      // Ignorar eventos em campos de texto
+      if (
+        e.target instanceof HTMLInputElement ||
+        e.target instanceof HTMLTextAreaElement ||
+        e.target instanceof HTMLSelectElement
+      ) {
+        return;
+      }
+      
+      // Verificar atalhos do clipboard
+      if (e.ctrlKey) {
+        if (e.key === 'c') {
+          e.preventDefault();
+          handleCopyRef.current();
+        } else if (e.key === 'x') {
+          e.preventDefault();
+          handleCutRef.current();
+        } else if (e.key === 'v') {
+          e.preventDefault();
+          handlePasteRef.current();
+        }
+      }
+    };
+    
+    // Adicionar listener
+    window.addEventListener('keydown', handleKeyboardShortcuts);
+    
+    // Cleanup
+    return () => {
+      window.removeEventListener('keydown', handleKeyboardShortcuts);
+    };
+  }, []);  // Sem dependências
+
   return (
     <div className="flex h-screen bg-gray-50">
       <SideBar onItemClick={handleShapeClick} items={iconData} />
@@ -1565,6 +1749,17 @@ function App() {
         onZoom={handleZoom}
         onZoomChange={handleZoomChange}
       />
+      
+      {/* Notificações */}
+      {notifications.map((notification, index) => (
+        <Notification
+          key={notification.id}
+          message={notification.message}
+          type={notification.type}
+          onClose={() => removeNotification(notification.id)}
+          index={index}
+        />
+      ))}
     </div>
   );
 }
