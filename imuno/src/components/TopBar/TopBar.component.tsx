@@ -3,10 +3,10 @@ import {
   ArrowRight, Type, Save, Undo2, Redo2, 
   Scissors, Copy, Clipboard, FlipHorizontal, FlipVertical, 
   Lock, Star, Layers, Crop, 
-  ChevronUp, ChevronDown
+  ChevronUp, ChevronDown, PenTool
 } from 'lucide-react';
 
-type TopBarProps = {
+interface TopBarProps {
   onSaveClick: () => void;
   onAddArrow: () => void;
   onAddText: () => void;
@@ -22,11 +22,15 @@ type TopBarProps = {
   onBringForward: () => void;
   onSendBackward: () => void;
   onCrop: () => void;
+  onBrushSizeChange: (size: number) => void;
+  onBrushColorChange: (color: string) => void;
+  onToggleBrushMode: () => void;
   opacity: number;
   onOpacityChange: (value: number) => void;
   isLocked: boolean;
   isFavorite: boolean;
-};
+  cursorState: string;
+}
 
 const TopBar: React.FC<TopBarProps> = ({
   onSaveClick,
@@ -44,10 +48,14 @@ const TopBar: React.FC<TopBarProps> = ({
   onBringForward,
   onSendBackward,
   onCrop,
+  onBrushSizeChange,
+  onBrushColorChange,
+  onToggleBrushMode,
   opacity,
   onOpacityChange,
   isLocked,
   isFavorite,
+  cursorState,
 }) => {
   return (
     <div className="h-16 bg-white border-b border-gray-200 px-4 flex items-center justify-between shadow-sm">
@@ -170,6 +178,35 @@ const TopBar: React.FC<TopBarProps> = ({
             className="w-24"
           />
           <span className="text-sm text-gray-600">{opacity}%</span>
+        </div>
+
+        {/* Brush Tools */}
+        <div className="flex items-center space-x-2 px-3 py-2 border border-gray-200 rounded-md bg-white">
+          <button
+            className={`p-2 rounded-md transition-colors duration-200 ${
+              cursorState === "drawing" 
+                ? 'bg-blue-100 text-blue-700' 
+                : 'hover:bg-gray-100 text-gray-600'
+            }`}
+            onClick={onToggleBrushMode}
+            title="Pincel/Brush"
+          >
+            <PenTool className="h-4 w-4" />
+          </button>
+          <input
+            type="range"
+            min="1"
+            max="50"
+            defaultValue="5"
+            onChange={(e) => onBrushSizeChange(Number(e.target.value))}
+            className="w-24"
+          />
+          <input
+            type="color"
+            defaultValue="#000000"
+            onChange={(e) => onBrushColorChange(e.target.value)}
+            className="w-8 h-8 rounded cursor-pointer"
+          />
         </div>
       </div>
 
