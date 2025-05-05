@@ -12,9 +12,14 @@ import Notification from './components/Notification/Notification.component';
 
 function App() {
 
-  const [transformer, setTransformer] = useState<Konva.Transformer | null>(
-    null
-  );
+  const [transformer, setTransformer] = useState<Konva.Transformer | null>(null);
+  const [isDrawing, setIsDrawing] = useState(false);
+  const [brushSize, setBrushSize] = useState(5);
+  const [brushColor, setBrushColor] = useState('#000000');
+  const [isBrushMode, setIsBrushMode] = useState(false);
+  const [lastLine, setLastLine] = useState<Konva.Line | null>(null);
+  const [currentStrokeGroup, setCurrentStrokeGroup] = useState<Konva.Group | null>(null);
+  const [isStrokeInProgress, setIsStrokeInProgress] = useState(false);
   const [cursorState, setCursorState] = useState("selecting");
   const [stage, setStage] = useState<Stage>();
   const [layer, setLayer] = useState<Layer>(new Konva.Layer());
@@ -360,30 +365,36 @@ function App() {
     if (historyStep.current === 0) {
       return;
     }
-    historyStep.current -= 1
+    historyStep.current -= 1;
     const previousAction = history.current[historyStep.current];
 
     if (previousAction.action === "add") {
-      previousAction.data.remove();
-      layer.draw();
+      if (previousAction.data instanceof Konva.Group) {
+        // Se for um grupo (traço do pincel), remover todo o grupo
+        previousAction.data.remove();
+      } else {
+        previousAction.data.remove();
+      }
+      layer?.draw();
     }
 
     if (previousAction.action === "delete") {
-      previousAction.data.nodes.forEach(node => {
-        layer.add(node)
-        layer.draw();
-      })
+      if (Array.isArray(previousAction.data.nodes)) {
+        previousAction.data.nodes.forEach((node: Konva.Node) => {
+          layer?.add(node);
+          layer?.draw();
+        });
+      }
     }
 
     if (previousAction.action === "movement") {
-      previousAction.data.forEach(node => {
-        const coords = node.coords
-        const konvaImage = node.konvaImage
-        konvaImage.x(coords.x)
-        konvaImage.y(coords.y)
-      })
-    };
-
+      previousAction.data.forEach((node: any) => {
+        const coords = node.coords;
+        const konvaImage = node.konvaImage;
+        konvaImage.x(coords.x);
+        konvaImage.y(coords.y);
+      });
+    }
   };
 
   const redo = () => {
@@ -1751,6 +1762,86 @@ function App() {
     };
   }, []);  // Sem dependências
 
+  const handleBrushSizeChange = (size: number) => {
+    setBrushSize(size);
+  };
+
+  const handleBrushColorChange = (color: string) => {
+    setBrushColor(color);
+  };
+
+  const toggleBrushMode = () => {
+    setIsBrushMode(!isBrushMode);
+    setCursorState(isBrushMode ? "selecting" : "drawing");
+    
+    // Atualizar o cursor do stage
+    if (stage) {
+      const container = stage.container();
+      if (container) {
+        if (cursorState === "drawing") {
+          container.style.cursor = "default";
+        } else {
+          // Ajustar o ponto de referência um pouco mais para a esquerda (x: 10, y: 2)
+          container.style.cursor = "url('data:image/svg+xml;utf8,<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"24\" height=\"24\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><path d=\"M12 19l7-7 3 3-7 7-3-3z\"/><path d=\"M18 13l-1.5-7.5L2 2l3.5 14.5L13 18l5-5z\"/><path d=\"M2 2l7.586 7.586\"/><circle cx=\"11\" cy=\"11\" r=\"2\"/></svg>') 10 2, auto";
+        }
+      }
+    }
+  };
+
+  const handleMouseDown = (e: Konva.KonvaEventObject<MouseEvent>) => {
+    if (cursorState !== "drawing") return;
+    
+    setIsDrawing(true);
+    const pos = e.target.getStage()?.getPointerPosition();
+    if (!pos) return;
+
+    const newLine = new Konva.Line({
+      stroke: brushColor,
+      strokeWidth: brushSize,
+      globalCompositeOperation: isBrushMode ? 'source-over' : 'multiply',
+      lineCap: 'round',
+      lineJoin: 'round',
+      points: [pos.x, pos.y],
+      name: "selectable",
+    });
+
+    layer?.add(newLine);
+    setLastLine(newLine);
+  };
+
+  const handleMouseMove = (e: Konva.KonvaEventObject<MouseEvent>) => {
+    if (!isDrawing || !lastLine) return;
+
+    const pos = e.target.getStage()?.getPointerPosition();
+    if (!pos) return;
+
+    const newPoints = lastLine.points().concat([pos.x, pos.y]);
+    lastLine.points(newPoints);
+    layer?.batchDraw();
+  };
+
+  const handleMouseUp = () => {
+    if (!isDrawing || !lastLine) return;
+    
+    setIsDrawing(false);
+    addHistory("add", lastLine);
+    setLastLine(null);
+  };
+
+  useEffect(() => {
+    if (!stage) return;
+
+    stage.on('mousedown', handleMouseDown);
+    stage.on('mousemove', handleMouseMove);
+    stage.on('mouseup', handleMouseUp);
+
+    return () => {
+      stage.off('mousedown', handleMouseDown);
+      stage.off('mousemove', handleMouseMove);
+      stage.off('mouseup', handleMouseUp);
+    };
+  }, [stage, isDrawing, lastLine, brushColor, brushSize, isBrushMode]);
+
   return (
     <div className="flex h-screen bg-gray-50">
       <SideBar onItemClick={handleShapeClick} items={iconData} />
@@ -1771,10 +1862,14 @@ function App() {
           onBringForward={handleBringForward}
           onSendBackward={handleSendBackward}
           onCrop={handleCrop}
+          onBrushSizeChange={handleBrushSizeChange}
+          onBrushColorChange={handleBrushColorChange}
+          onToggleBrushMode={toggleBrushMode}
           opacity={opacity}
           onOpacityChange={handleOpacityChange}
           isLocked={isLocked}
           isFavorite={isFavorite}
+          cursorState={cursorState}
         />
         <div
           className={`flex-1 bg-gray-100 ${previewMode ? "preview-mode" : ""}`}
