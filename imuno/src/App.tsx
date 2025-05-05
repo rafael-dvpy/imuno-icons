@@ -23,7 +23,7 @@ function App() {
   const [textContent, setTextContent] = useState<string>("");
   const history = useRef<{ action: string, data: any }[]>([]);
   const historyStep = useRef(0);
-  const [clipboard, setClipboard] = useState<any>(null);
+  const [clipboard, setClipboard] = useState<Konva.Node[]>([]);
   const [opacity, setOpacity] = useState<number>(100);
   const [isLocked, setIsLocked] = useState<boolean>(false);
   const [isFavorite, setIsFavorite] = useState<boolean>(false);
@@ -436,7 +436,7 @@ function App() {
 
   const handlePasteInternal = () => {
     if (clipboard && layer) {
-      const clone = clipboard.clone();
+      const clone = clipboard[0].clone();
       
       // Deslocar a posição para ficar visível que é um novo item
       clone.x(clone.x() + 20);
@@ -464,18 +464,40 @@ function App() {
 
   // Funções para a interface do usuário que chamam as funções internas e mostram notificações
   const handleCopy = () => {
-    const success = handleCopyInternal();
-    if (success) {
-      showNotification("Item copiado para a área de transferência", "success");
+    const nodes = transformer?.nodes();
+    if (nodes && nodes.length > 0) {
+      // Clonar todos os nós selecionados
+      const clonedNodes = nodes.map(node => node.clone());
+      setClipboard(clonedNodes);
+      
+      showNotification(
+        nodes.length === 1 
+          ? "Item copiado para a área de transferência" 
+          : `${nodes.length} itens copiados para a área de transferência`,
+        "success"
+      );
     } else {
       showNotification("Nenhum item selecionado para copiar", "error");
     }
   };
 
   const handleCut = () => {
-    const success = handleCutInternal();
-    if (success) {
-      showNotification("Item recortado para a área de transferência", "success");
+    const nodes = transformer?.nodes();
+    if (nodes && nodes.length > 0 && !isLocked) {
+      // Clonar todos os nós selecionados antes de removê-los
+      const clonedNodes = nodes.map(node => node.clone());
+      setClipboard(clonedNodes);
+      
+      // Remover os nós originais
+      nodes.forEach(node => node.remove());
+      layer.draw();
+      
+      showNotification(
+        nodes.length === 1 
+          ? "Item recortado para a área de transferência" 
+          : `${nodes.length} itens recortados para a área de transferência`,
+        "success"
+      );
     } else if (isLocked) {
       showNotification("Não é possível recortar itens bloqueados", "error");
     } else {
@@ -484,9 +506,38 @@ function App() {
   };
 
   const handlePaste = () => {
-    const success = handlePasteInternal();
-    if (success) {
-      showNotification("Item colado com sucesso", "success");
+    if (clipboard.length > 0 && layer) {
+      // Clonar todos os itens do clipboard
+      const clonedNodes = clipboard.map(node => {
+        const clone = node.clone();
+        // Deslocar cada item clonado
+        clone.x(clone.x() + 20);
+        clone.y(clone.y() + 20);
+        return clone;
+      });
+      
+      // Adicionar todos os clones à camada
+      clonedNodes.forEach(clone => {
+        layer.add(clone);
+      });
+      
+      // Selecionar todos os itens colados
+      if (transformer) {
+        transformer.nodes(clonedNodes);
+        transformer.moveToTop();
+      }
+      
+      // Adicionar ao histórico como um grupo de ações
+      addHistory("add", clonedNodes);
+      
+      layer.draw();
+      
+      showNotification(
+        clonedNodes.length === 1 
+          ? "Item colado com sucesso" 
+          : `${clonedNodes.length} itens colados com sucesso`,
+        "success"
+      );
     } else {
       showNotification("Nada para colar. Copie um item primeiro.", "info");
     }
