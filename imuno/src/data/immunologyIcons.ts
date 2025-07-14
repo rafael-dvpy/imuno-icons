@@ -11,7 +11,7 @@ const immunologyIcons: IconItem[] = [
   { id: "pocket", url: "/files/pocket.svg" },
   { id: "micobacteria", url: "/files/micobacteria.svg" },
   { id: "Macrophage", url: "/files/Macrophage.svg" },
-  { id: "Lissosoma", url: "/files/Lisossoma.svg" },
+  { id: "Lisossoma", url: "/files/Lisossoma.svg" },
   { id: "Empty Macrophage", url: "/files/Emptymacrophage.svg" },
 ];
 
