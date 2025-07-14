@@ -24,9 +24,9 @@
      inkscape:pagecheckerboard="0"
      inkscape:deskcolor="#d1d1d1"
      inkscape:document-units="mm"
-     inkscape:zoom="1.0396254"
-     inkscape:cx="397.25847"
-     inkscape:cy="561.25984"
+     inkscape:zoom="1.4702524"
+     inkscape:cx="326.47456"
+     inkscape:cy="412.51421"
      inkscape:window-width="2560"
      inkscape:window-height="1369"
      inkscape:window-x="1912"
@@ -76,6 +76,10 @@
      inkscape:label="Camada 1"
      inkscape:groupmode="layer"
      id="layer1">
+    <path
+       d="m 30.548153,121.06458 -0.03483,-10.21796 c 28.445427,0.72042 28.50711,-29.49742 0.141269,-28.5929 l 0.144534,-9.95169 h 41.720811 v 19.02957 29.70943 z"
+       style="fill:#2668e5;fill-opacity:1;stroke:#000000;stroke-width:0.361187"
+       id="path1-3" />
     <ellipse
        style="fill:#2668e5;fill-opacity:1;stroke:#000000;stroke-width:0.58895"
        id="path1"
