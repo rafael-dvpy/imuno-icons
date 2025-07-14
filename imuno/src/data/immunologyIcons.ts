@@ -1,4 +1,4 @@
-import { IconItem } from './iconData';
+import { IconItem } from "./iconData";
 
 const immunologyIcons: IconItem[] = [
   { id: "Antibody", url: "/files/icion_anticorpo.svg" },
@@ -7,6 +7,12 @@ const immunologyIcons: IconItem[] = [
   { id: "DendriticCell", url: "/files/dend-cell.svg" },
   { id: "MHC-II", url: "/files/mch-2.svg" },
   { id: "T-CellReceptor", url: "/files/t-receptor.svg" },
+  { id: "TH1", url: "/files/TH1.svg" },
+  { id: "pocket", url: "/files/pocket.svg" },
+  { id: "micobacteria", url: "/files/micobacteria.svg" },
+  { id: "Macrophage", url: "/files/Macrophage.svg" },
+  { id: "Lissosoma", url: "/files/Lisossoma.svg" },
+  { id: "Empty Macrophage", url: "/files/Emptymacrophage.svg" },
 ];
 
-export default immunologyIcons; 
+export default immunologyIcons;
