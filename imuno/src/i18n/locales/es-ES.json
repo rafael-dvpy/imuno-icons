@@ -1,0 +1,73 @@
+{
+  "common": {
+    "search": "Buscar",
+    "export": "Exportar",
+    "save": "Guardar",
+    "undo": "Deshacer",
+    "redo": "Rehacer",
+    "cut": "Cortar",
+    "copy": "Copiar",
+    "paste": "Pegar",
+    "lock": "Bloquear",
+    "unlock": "Desbloquear",
+    "favorite": "Favorito",
+    "crop": "Recortar",
+    "arrow": "Flecha",
+    "text": "Texto",
+    "brush": "Pincel",
+    "opacity": "Opacidad",
+    "bringForward": "Traer al frente",
+    "sendBackward": "Enviar atrás",
+    "flipHorizontal": "Voltear horizontalmente",
+    "flipVertical": "Voltear verticalmente",
+    "ruler": "Regla",
+    "grid": "Cuadrícula",
+    "preview": "Vista previa",
+    "zoom": "Zoom",
+    "canvasColor": "Color del lienzo",
+    "language": "Idioma"
+  },
+  "categories": {
+    "immunology": "Inmunología",
+    "anatomy": "Anatomía",
+    "virus": "Virus",
+    "cellsAndOrganelles": "Células y Orgánulos",
+    "proteins": "Proteínas",
+    "equipment": "Equipos"
+  },
+  "subcategories": {
+    "organSystem": "Sistema de Órganos",
+    "skeletalSystem": "Sistema Esquelético",
+    "reproductiveSystem": "Sistema Reproductivo",
+    "circulatorySystem": "Sistema Circulatorio",
+    "lymphaticSystem": "Sistema Linfático",
+    "cellularStructures": "Estructuras Celulares",
+    "immuneCells": "Células Inmunes",
+    "stemCells": "Células Madre",
+    "otherCells": "Otras Células"
+  },
+  "notifications": {
+    "itemCopied": "Elemento copiado al portapapeles",
+    "itemsCopied": "{{count}} elementos copiados al portapapeles",
+    "itemCut": "Elemento cortado al portapapeles",
+    "itemsCut": "{{count}} elementos cortados al portapapeles",
+    "itemPasted": "Elemento pegado exitosamente",
+    "itemsPasted": "{{count}} elementos pegados exitosamente",
+    "noItemSelected": "Ningún elemento seleccionado para copiar",
+    "noItemToCut": "Ningún elemento seleccionado para cortar",
+    "nothingToPaste": "Nada que pegar. Copia un elemento primero.",
+    "cannotCutLocked": "No se pueden cortar elementos bloqueados",
+    "loadingSvg": "Cargando SVG...",
+    "errorLoadingSvg": "Error al cargar SVG",
+    "doubleClickToEdit": "Doble clic para editar"
+  },
+  "languages": {
+    "pt-BR": "Português (Brasil)",
+    "en-US": "English (US)",
+    "es-ES": "Español (España)"
+  },
+  "search": {
+    "placeholder": "Buscar iconos...",
+    "noResults": "No se encontraron elementos."
+  }
+}

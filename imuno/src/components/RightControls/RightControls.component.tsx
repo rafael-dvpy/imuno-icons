@@ -1,5 +1,6 @@
 import React, { useRef } from 'react';
 import { Ruler, ZoomIn, ZoomOut, Grid, Eye, PaintBucket } from 'lucide-react';
+import { useTranslation } from '../../hooks/useTranslation';
 
 interface RightControlsProps {
   rulerVisible: boolean;
@@ -28,6 +29,7 @@ const RightControls: React.FC<RightControlsProps> = ({
   onZoom,
   onZoomChange,
 }) => {
+  const { t } = useTranslation();
   const sliderRef = useRef<HTMLDivElement>(null);
 
   const handleSliderClick = (e: React.MouseEvent<HTMLDivElement>) => {
@@ -56,7 +58,7 @@ const RightControls: React.FC<RightControlsProps> = ({
           <button
             className="p-2 hover:bg-gray-100 rounded-md"
             onClick={() => onZoom('in')}
-            title="Aumentar Zoom"
+            title={`${t('common.zoom')} +`}
           >
             <ZoomIn className="h-4 w-4 text-gray-600" />
           </button>
@@ -78,7 +80,7 @@ const RightControls: React.FC<RightControlsProps> = ({
           <button
             className="p-2 hover:bg-gray-100 rounded-md"
             onClick={() => onZoom('out')}
-            title="Diminuir Zoom"
+            title={`${t('common.zoom')} -`}
           >
             <ZoomOut className="h-4 w-4 text-gray-600" />
           </button>
@@ -93,7 +95,7 @@ const RightControls: React.FC<RightControlsProps> = ({
               gridVisible ? 'bg-blue-100 text-blue-700' : 'hover:bg-gray-100 text-gray-600'
             }`}
             onClick={() => onGridToggle(!gridVisible)}
-            title="Mostrar/Ocultar Grade"
+            title={t('common.grid')}
           >
             <Grid className="h-4 w-4" />
           </button>
@@ -103,7 +105,7 @@ const RightControls: React.FC<RightControlsProps> = ({
               previewMode ? 'bg-blue-100 text-blue-700' : 'hover:bg-gray-100 text-gray-600'
             }`}
             onClick={onPreviewToggle}
-            title="Modo Preview"
+            title={t('common.preview')}
           >
             <Eye className="h-4 w-4" />
           </button>
@@ -113,7 +115,7 @@ const RightControls: React.FC<RightControlsProps> = ({
               rulerVisible ? 'bg-blue-100 text-blue-700' : 'hover:bg-gray-100 text-gray-600'
             }`}
             onClick={() => onRulerToggle(!rulerVisible)}
-            title="Mostrar/Ocultar Régua"
+            title={t('common.ruler')}
           >
             <Ruler className="h-4 w-4" />
           </button>
@@ -121,7 +123,7 @@ const RightControls: React.FC<RightControlsProps> = ({
           <button
             className="p-2 hover:bg-gray-100 rounded-md text-gray-600"
             onClick={() => document.getElementById('canvas-color-picker')?.click()}
-            title="Cor do Canvas"
+            title={t('common.canvasColor')}
           >
             <PaintBucket className="h-4 w-4" />
           </button>

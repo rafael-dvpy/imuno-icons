@@ -5,6 +5,8 @@ import {
   Lock, Star, Layers, Crop, 
   ChevronUp, ChevronDown, PenTool
 } from 'lucide-react';
+import { useTranslation } from '../../hooks/useTranslation';
+import LanguageSwitcher from '../LanguageSwitcher/LanguageSwitcher.component';
 
 interface TopBarProps {
   onSaveClick: () => void;
@@ -57,6 +59,7 @@ const TopBar: React.FC<TopBarProps> = ({
   isFavorite,
   cursorState,
 }) => {
+  const { t } = useTranslation();
   return (
     <div className="h-16 bg-white border-b border-gray-200 px-4 flex items-center justify-between shadow-sm">
       <div className="flex space-x-2">
@@ -66,14 +69,14 @@ const TopBar: React.FC<TopBarProps> = ({
           onClick={onAddArrow}
         >
           <ArrowRight className="h-4 w-4 mr-2" />
-          Arrow
+          {t('common.arrow')}
         </button>
         <button
           className="inline-flex items-center px-3 py-2 border border-gray-200 rounded-md text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
           onClick={onAddText}
         >
           <Type className="h-4 w-4 mr-2" />
-          Text
+          {t('common.text')}
         </button>
 
         <div className="h-6 w-px bg-gray-200 mx-2" />
@@ -84,21 +87,21 @@ const TopBar: React.FC<TopBarProps> = ({
           onClick={onCut}
         >
           <Scissors className="h-4 w-4 mr-2" />
-          Cut
+          {t('common.cut')}
         </button>
         <button
           className="inline-flex items-center px-3 py-2 border border-gray-200 rounded-md text-sm font-medium text-gray-700 bg-white hover:bg-gray-50"
           onClick={onCopy}
         >
           <Copy className="h-4 w-4 mr-2" />
-          Copy
+          {t('common.copy')}
         </button>
         <button
           className="inline-flex items-center px-3 py-2 border border-gray-200 rounded-md text-sm font-medium text-gray-700 bg-white hover:bg-gray-50"
           onClick={onPaste}
         >
           <Clipboard className="h-4 w-4 mr-2" />
-          Paste
+          {t('common.paste')}
         </button>
 
         <div className="h-6 w-px bg-gray-200 mx-2" />
@@ -109,14 +112,14 @@ const TopBar: React.FC<TopBarProps> = ({
           onClick={onBringForward}
         >
           <ChevronUp className="h-4 w-4 mr-2" />
-          Bring Forward
+          {t('common.bringForward')}
         </button>
         <button
           className="inline-flex items-center px-3 py-2 border border-gray-200 rounded-md text-sm font-medium text-gray-700 bg-white hover:bg-gray-50"
           onClick={onSendBackward}
         >
           <ChevronDown className="h-4 w-4 mr-2" />
-          Send Backward
+          {t('common.sendBackward')}
         </button>
 
         <div className="h-6 w-px bg-gray-200 mx-2" />
@@ -127,14 +130,14 @@ const TopBar: React.FC<TopBarProps> = ({
           onClick={onFlipHorizontal}
         >
           <FlipHorizontal className="h-4 w-4 mr-2" />
-          Flip H
+          {t('common.flipHorizontal')}
         </button>
         <button
           className="inline-flex items-center px-3 py-2 border border-gray-200 rounded-md text-sm font-medium text-gray-700 bg-white hover:bg-gray-50"
           onClick={onFlipVertical}
         >
           <FlipVertical className="h-4 w-4 mr-2" />
-          Flip V
+          {t('common.flipVertical')}
         </button>
 
         <div className="h-6 w-px bg-gray-200 mx-2" />
@@ -147,7 +150,7 @@ const TopBar: React.FC<TopBarProps> = ({
           onClick={onLock}
         >
           <Lock className="h-4 w-4 mr-2" />
-          Lock
+          {isLocked ? t('common.unlock') : t('common.lock')}
         </button>
         <button
           className={`inline-flex items-center px-3 py-2 border border-gray-200 rounded-md text-sm font-medium ${
@@ -156,14 +159,14 @@ const TopBar: React.FC<TopBarProps> = ({
           onClick={onFavorite}
         >
           <Star className="h-4 w-4 mr-2" />
-          Favorite
+          {t('common.favorite')}
         </button>
         <button
           className="inline-flex items-center px-3 py-2 border border-gray-200 rounded-md text-sm font-medium text-gray-700 bg-white hover:bg-gray-50"
           onClick={onCrop}
         >
           <Crop className="h-4 w-4 mr-2" />
-          Crop
+          {t('common.crop')}
         </button>
 
         {/* Opacity Slider */}
@@ -189,7 +192,7 @@ const TopBar: React.FC<TopBarProps> = ({
                 : 'hover:bg-gray-100 text-gray-600'
             }`}
             onClick={onToggleBrushMode}
-            title="Pincel/Brush"
+            title={t('common.brush')}
           >
             <PenTool className="h-4 w-4" />
           </button>
@@ -211,16 +214,19 @@ const TopBar: React.FC<TopBarProps> = ({
       </div>
 
       <div className="flex items-center space-x-4">
+        <LanguageSwitcher />
         <div className="flex space-x-2">
           <button
             className="p-2 text-gray-500 hover:text-gray-700 focus:outline-none"
             onClick={onUndo}
+            title={t('common.undo')}
           >
             <Undo2 className="h-5 w-5" />
           </button>
           <button
             className="p-2 text-gray-500 hover:text-gray-700 focus:outline-none"
             onClick={onRedo}
+            title={t('common.redo')}
           >
             <Redo2 className="h-5 w-5" />
           </button>
@@ -230,7 +236,7 @@ const TopBar: React.FC<TopBarProps> = ({
           onClick={onSaveClick}
         >
           <Save className="h-4 w-4 mr-2" />
-          Export
+          {t('common.export')}
         </button>
       </div>
     </div>
