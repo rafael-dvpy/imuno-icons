@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import SearchBar from "../SearchBar.component";
 import "./SideBar.component.css";
 import Icon from "../Icon.component";
+import { useTranslation } from "../../hooks/useTranslation";
 
 // Define a estrutura para os itens
 export interface IconItem {
@@ -20,6 +21,7 @@ interface SideBarProps {
 }
 
 const SideBar: React.FC<SideBarProps> = ({ onItemClick, items }) => {
+  const { t } = useTranslation();
   const [searchTerm, setSearchTerm] = useState<string>("");
   const [expandedCategories, setExpandedCategories] = useState<{[key: string]: boolean}>({
     immunology: true,
@@ -74,21 +76,41 @@ const SideBar: React.FC<SideBarProps> = ({ onItemClick, items }) => {
     });
   };
 
-  // Tradução dos nomes das categorias
-  const categoryNames: {[key: string]: string} = {
-    immunology: "Imunologia",
-    anatomy: "Anatomia",
-    virus: "Vírus"
+  // Mapeamento das chaves das categorias para as chaves de tradução
+  const categoryKeyMap: {[key: string]: string} = {
+    "Immunology": "immunology",
+    "Anatomy": "anatomy", 
+    "Virus": "virus",
+    "Cells and Organelles": "cellsAndOrganelles",
+    "Equipment": "equipment",
+    "Proteins": "proteins"
+  };
+
+  // Função para obter o nome traduzido da categoria
+  const getCategoryName = (category: string): string => {
+    const translationKey = categoryKeyMap[category] || category.toLowerCase();
+    return t(`categories.${translationKey}`) || category;
   };
   
-  // Tradução dos nomes das subcategorias
-  const subcategoryNames: {[key: string]: string} = {
-    organSystem: "Sistema de Órgãos",
-    skeletalSystem: "Sistema Esquelético",
-    reproductiveSystem: "Sistema Reprodutivo",
-    circulatorySystem: "Sistema Circulatório",
-    lymphaticSystem: "Sistema Linfático",
-    cellularStructures: "Estruturas Celulares"
+  // Mapeamento das chaves das subcategorias para as chaves de tradução
+  const subcategoryKeyMap: {[key: string]: string} = {
+    // Subcategorias de Anatomy
+    "Organ System": "organSystem",
+    "Skeletal System": "skeletalSystem",
+    "Reproductive System": "reproductiveSystem", 
+    "Circulatory System": "circulatorySystem",
+    "Lymphatic System": "lymphaticSystem",
+    "Cellular Structures": "cellularStructures",
+    // Subcategorias de Cells and Organelles
+    "Immune Cells": "immuneCells",
+    "Stem Cells": "stemCells",
+    "Other Cells": "otherCells"
+  };
+
+  // Função para obter o nome traduzido da subcategoria
+  const getSubcategoryName = (subcategory: string): string => {
+    const translationKey = subcategoryKeyMap[subcategory] || subcategory.toLowerCase();
+    return t(`subcategories.${translationKey}`) || subcategory;
   };
 
   // Filtrar itens com base no termo de busca
@@ -174,7 +196,7 @@ const SideBar: React.FC<SideBarProps> = ({ onItemClick, items }) => {
                   onClick={() => toggleCategory(category)}
                 >
                   <h3 className="font-bold text-gray-700">
-                    {categoryNames[category] || category}
+                    {getCategoryName(category)}
                   </h3>
                   <span>{expandedCategories[category] ? '▼' : '►'}</span>
                 </div>
@@ -193,7 +215,7 @@ const SideBar: React.FC<SideBarProps> = ({ onItemClick, items }) => {
                             onClick={() => toggleSubcategory(category, subcategory)}
                           >
                             <h4 className="font-medium text-gray-700 text-sm">
-                              {subcategoryNames[subcategory] || subcategory}
+                              {getSubcategoryName(subcategory)}
                               <span className="ml-2 text-xs text-gray-500">
                                 ({(filteredItems[category] as any)[subcategory].length})
                               </span>
@@ -213,7 +235,7 @@ const SideBar: React.FC<SideBarProps> = ({ onItemClick, items }) => {
             ))}
           </div>
         ) : (
-          <p className="text-gray-500">Nenhum item encontrado.</p>
+          <p className="text-gray-500">{t('search.noResults')}</p>
         )}
       </div>
     </div>

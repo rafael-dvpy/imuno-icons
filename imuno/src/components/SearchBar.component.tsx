@@ -1,5 +1,6 @@
 import React, { ChangeEvent, useState, useEffect } from "react";
 import { Search } from 'lucide-react';
+import { useTranslation } from '../hooks/useTranslation';
 
 interface SearchBarProps {
   onSearch: (searchTerm: string) => void;
@@ -8,8 +9,9 @@ interface SearchBarProps {
 
 const SearchBar: React.FC<SearchBarProps> = ({
   onSearch,
-  placeholder = "Search...",
+  placeholder,
 }) => {
+  const { t } = useTranslation();
   const [inputValue, setInputValue] = useState<string>("");
 
   useEffect(() => {
@@ -32,7 +34,7 @@ const SearchBar: React.FC<SearchBarProps> = ({
       <input
         type="text"
         value={inputValue}
-        placeholder={placeholder}
+        placeholder={placeholder || t('search.placeholder')}
         className="block w-full pl-10 pr-3 py-2 border border-gray-200 rounded-md text-sm placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
         onChange={handleChange}
       />

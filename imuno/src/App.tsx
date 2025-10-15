@@ -9,9 +9,10 @@ import iconData from "./data/iconData";
 import svgCache from "./services/SvgCache";
 import { BathIcon } from "lucide-react";
 import Notification from './components/Notification/Notification.component';
+import { useTranslation } from './hooks/useTranslation';
 
 function App() {
-
+  const { t } = useTranslation();
   const [transformer, setTransformer] = useState<Konva.Transformer | null>(null);
   const [isDrawing, setIsDrawing] = useState(false);
   const [brushSize, setBrushSize] = useState(5);
@@ -483,12 +484,12 @@ function App() {
       
       showNotification(
         nodes.length === 1 
-          ? "Item copiado para a área de transferência" 
-          : `${nodes.length} itens copiados para a área de transferência`,
+          ? t('notifications.itemCopied')
+          : t('notifications.itemsCopied', { count: nodes.length }),
         "success"
       );
     } else {
-      showNotification("Nenhum item selecionado para copiar", "error");
+      showNotification(t('notifications.noItemSelected'), "error");
     }
   };
 
@@ -505,14 +506,14 @@ function App() {
       
       showNotification(
         nodes.length === 1 
-          ? "Item recortado para a área de transferência" 
-          : `${nodes.length} itens recortados para a área de transferência`,
+          ? t('notifications.itemCut')
+          : t('notifications.itemsCut', { count: nodes.length }),
         "success"
       );
     } else if (isLocked) {
-      showNotification("Não é possível recortar itens bloqueados", "error");
+      showNotification(t('notifications.cannotCutLocked'), "error");
     } else {
-      showNotification("Nenhum item selecionado para recortar", "error");
+      showNotification(t('notifications.noItemToCut'), "error");
     }
   };
 
@@ -545,12 +546,12 @@ function App() {
       
       showNotification(
         clonedNodes.length === 1 
-          ? "Item colado com sucesso" 
-          : `${clonedNodes.length} itens colados com sucesso`,
+          ? t('notifications.itemPasted')
+          : t('notifications.itemsPasted', { count: clonedNodes.length }),
         "success"
       );
     } else {
-      showNotification("Nada para colar. Copie um item primeiro.", "info");
+      showNotification(t('notifications.nothingToPaste'), "info");
     }
   };
 
@@ -1062,7 +1063,7 @@ function App() {
       const loadingText = new Konva.Text({
         x: x,
         y: y,
-        text: "Carregando SVG...",
+        text: t('notifications.loadingSvg'),
         fontSize: 14,
         fill: "#333",
         padding: 10,
@@ -1098,7 +1099,7 @@ function App() {
 
         image.onerror = () => {
           // Em caso de erro, mostrar uma mensagem
-          loadingText.text("Erro ao carregar SVG");
+          loadingText.text(t('notifications.errorLoadingSvg'));
           loadingText.fill("red");
           layer.draw();
 
@@ -1405,7 +1406,7 @@ function App() {
 
         // Criar o texto com placeholder
         const text = new Konva.Text({
-          text: textContent || "Clique duplo para editar",
+          text: textContent || t('notifications.doubleClickToEdit'),
           fontSize: 14,
           fontFamily: "Inter, sans-serif",
           fill: "#2D3748",
@@ -1557,7 +1558,7 @@ function App() {
       if (!document.body.contains(textarea)) return;
 
       // Aplicar o texto ao nó
-      textNode.text(textarea.value || "Clique duplo para editar");
+      textNode.text(textarea.value || t('notifications.doubleClickToEdit'));
 
       // Remover o textarea
       document.body.removeChild(textarea);

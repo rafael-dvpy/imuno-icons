@@ -1,0 +1,73 @@
+{
+  "common": {
+    "search": "Pesquisar",
+    "export": "Exportar",
+    "save": "Salvar",
+    "undo": "Desfazer",
+    "redo": "Refazer",
+    "cut": "Recortar",
+    "copy": "Copiar",
+    "paste": "Colar",
+    "lock": "Bloquear",
+    "unlock": "Desbloquear",
+    "favorite": "Favorito",
+    "crop": "Recortar",
+    "arrow": "Seta",
+    "text": "Texto",
+    "brush": "Pincel",
+    "opacity": "Opacidade",
+    "bringForward": "Trazer para frente",
+    "sendBackward": "Enviar para trás",
+    "flipHorizontal": "Inverter horizontalmente",
+    "flipVertical": "Inverter verticalmente",
+    "ruler": "Régua",
+    "grid": "Grade",
+    "preview": "Visualizar",
+    "zoom": "Zoom",
+    "canvasColor": "Cor do canvas",
+    "language": "Idioma"
+  },
+  "categories": {
+    "immunology": "Imunologia",
+    "anatomy": "Anatomia",
+    "virus": "Vírus",
+    "cellsAndOrganelles": "Células e Organelas",
+    "proteins": "Proteínas",
+    "equipment": "Equipamentos"
+  },
+  "subcategories": {
+    "organSystem": "Sistema de Órgãos",
+    "skeletalSystem": "Sistema Esquelético",
+    "reproductiveSystem": "Sistema Reprodutivo",
+    "circulatorySystem": "Sistema Circulatório",
+    "lymphaticSystem": "Sistema Linfático",
+    "cellularStructures": "Estruturas Celulares",
+    "immuneCells": "Células Imunes",
+    "stemCells": "Células-Tronco",
+    "otherCells": "Outras Células"
+  },
+  "notifications": {
+    "itemCopied": "Item copiado para a área de transferência",
+    "itemsCopied": "{{count}} itens copiados para a área de transferência",
+    "itemCut": "Item recortado para a área de transferência",
+    "itemsCut": "{{count}} itens recortados para a área de transferência",
+    "itemPasted": "Item colado com sucesso",
+    "itemsPasted": "{{count}} itens colados com sucesso",
+    "noItemSelected": "Nenhum item selecionado para copiar",
+    "noItemToCut": "Nenhum item selecionado para recortar",
+    "nothingToPaste": "Nada para colar. Copie um item primeiro.",
+    "cannotCutLocked": "Não é possível recortar itens bloqueados",
+    "loadingSvg": "Carregando SVG...",
+    "errorLoadingSvg": "Erro ao carregar SVG",
+    "doubleClickToEdit": "Clique duplo para editar"
+  },
+  "languages": {
+    "pt-BR": "Português (Brasil)",
+    "en-US": "English (US)",
+    "es-ES": "Español (España)"
+  },
+  "search": {
+    "placeholder": "Pesquisar ícones...",
+    "noResults": "Nenhum item encontrado."
+  }
+}

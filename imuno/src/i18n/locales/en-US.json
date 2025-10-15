@@ -1,0 +1,73 @@
+{
+  "common": {
+    "search": "Search",
+    "export": "Export",
+    "save": "Save",
+    "undo": "Undo",
+    "redo": "Redo",
+    "cut": "Cut",
+    "copy": "Copy",
+    "paste": "Paste",
+    "lock": "Lock",
+    "unlock": "Unlock",
+    "favorite": "Favorite",
+    "crop": "Crop",
+    "arrow": "Arrow",
+    "text": "Text",
+    "brush": "Brush",
+    "opacity": "Opacity",
+    "bringForward": "Bring Forward",
+    "sendBackward": "Send Backward",
+    "flipHorizontal": "Flip Horizontal",
+    "flipVertical": "Flip Vertical",
+    "ruler": "Ruler",
+    "grid": "Grid",
+    "preview": "Preview",
+    "zoom": "Zoom",
+    "canvasColor": "Canvas Color",
+    "language": "Language"
+  },
+  "categories": {
+    "immunology": "Immunology",
+    "anatomy": "Anatomy",
+    "virus": "Virus",
+    "cellsAndOrganelles": "Cells and Organelles",
+    "proteins": "Proteins",
+    "equipment": "Equipment"
+  },
+  "subcategories": {
+    "organSystem": "Organ System",
+    "skeletalSystem": "Skeletal System",
+    "reproductiveSystem": "Reproductive System",
+    "circulatorySystem": "Circulatory System",
+    "lymphaticSystem": "Lymphatic System",
+    "cellularStructures": "Cellular Structures",
+    "immuneCells": "Immune Cells",
+    "stemCells": "Stem Cells",
+    "otherCells": "Other Cells"
+  },
+  "notifications": {
+    "itemCopied": "Item copied to clipboard",
+    "itemsCopied": "{{count}} items copied to clipboard",
+    "itemCut": "Item cut to clipboard",
+    "itemsCut": "{{count}} items cut to clipboard",
+    "itemPasted": "Item pasted successfully",
+    "itemsPasted": "{{count}} items pasted successfully",
+    "noItemSelected": "No item selected to copy",
+    "noItemToCut": "No item selected to cut",
+    "nothingToPaste": "Nothing to paste. Copy an item first.",
+    "cannotCutLocked": "Cannot cut locked items",
+    "loadingSvg": "Loading SVG...",
+    "errorLoadingSvg": "Error loading SVG",
+    "doubleClickToEdit": "Double click to edit"
+  },
+  "languages": {
+    "pt-BR": "Português (Brasil)",
+    "en-US": "English (US)",
+    "es-ES": "Español (España)"
+  },
+  "search": {
+    "placeholder": "Search icons...",
+    "noResults": "No items found."
+  }
+}
