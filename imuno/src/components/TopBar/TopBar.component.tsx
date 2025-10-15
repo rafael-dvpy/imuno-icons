@@ -1,9 +1,9 @@
 import React from 'react';
-import { 
-  ArrowRight, Type, Save, Undo2, Redo2, 
-  Scissors, Copy, Clipboard, FlipHorizontal, FlipVertical, 
-  Lock, Star, Layers, Crop, 
-  ChevronUp, ChevronDown, PenTool
+import {
+  ArrowRight, Type, Save, Undo2, Redo2,
+  Scissors, Copy, Clipboard, FlipHorizontal, FlipVertical,
+  Lock, Star, Layers, Crop,
+  ChevronUp, ChevronDown, PenTool, Bot
 } from 'lucide-react';
 import { useTranslation } from '../../hooks/useTranslation';
 import LanguageSwitcher from '../LanguageSwitcher/LanguageSwitcher.component';
@@ -32,6 +32,8 @@ interface TopBarProps {
   isLocked: boolean;
   isFavorite: boolean;
   cursorState: string;
+  onToggleAI: () => void;
+  isAIOpen: boolean;
 }
 
 const TopBar: React.FC<TopBarProps> = ({
@@ -58,6 +60,8 @@ const TopBar: React.FC<TopBarProps> = ({
   isLocked,
   isFavorite,
   cursorState,
+  onToggleAI,
+  isAIOpen,
 }) => {
   const { t } = useTranslation();
   return (
@@ -77,6 +81,16 @@ const TopBar: React.FC<TopBarProps> = ({
         >
           <Type className="h-4 w-4 mr-2" />
           {t('common.text')}
+        </button>
+
+        <button
+          className={`inline-flex items-center px-3 py-2 border border-gray-200 rounded-md text-sm font-medium ${
+            isAIOpen ? 'bg-blue-100 text-blue-700 border-blue-300' : 'text-gray-700 bg-white'
+          } hover:bg-blue-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors`}
+          onClick={onToggleAI}
+        >
+          <Bot className="h-4 w-4 mr-2" />
+          {t('ai.askAI')}
         </button>
 
         <div className="h-6 w-px bg-gray-200 mx-2" />
