@@ -5,6 +5,7 @@ import { Layer } from "konva/lib/Layer";
 import SideBar from "./components/SideBar/SideBar.component";
 import TopBar from "./components/TopBar/TopBar.component";
 import RightControls from "./components/RightControls/RightControls.component";
+import AIAssistant from "./components/AIAssistant/AIAssistant.component";
 import iconData from "./data/iconData";
 import svgCache from "./services/SvgCache";
 import { BathIcon } from "lucide-react";
@@ -47,9 +48,36 @@ function App() {
     message: string;
     type: 'success' | 'error' | 'info';
   }[]>([]);
+  const [isAIOpen, setIsAIOpen] = useState(false);
+  const [isAIMinimized, setIsAIMinimized] = useState(false);
 
   const selectingCursorState = () => {
     setCursorState("selecting");
+  };
+
+  const handleToggleAI = () => {
+    setIsAIOpen(!isAIOpen);
+    setIsAIMinimized(false);
+  };
+
+  const handleCloseAI = () => {
+    setIsAIOpen(false);
+    setIsAIMinimized(false);
+  };
+
+  const handleToggleAIMinimize = () => {
+    setIsAIMinimized(!isAIMinimized);
+  };
+
+  const handleAIIconSuggestion = (iconId: string) => {
+    setSelectedShape(iconId);
+    showNotification(t('ai.iconSelected'), 'success');
+  };
+
+  const handleAIAddText = (text: string) => {
+    setTextContent(text);
+    addRectWithText();
+    showNotification(t('ai.textAdded'), 'success');
   };
 
   useEffect(() => {
@@ -695,7 +723,7 @@ function App() {
       // Obter a posição e tamanho do retângulo de recorte
       const cropBox = cropRect.getClientRect();
 
-      // Verificar se o nó selecionado é uma imagem
+      // Verificar se o n�� selecionado é uma imagem
       if (selectedNode.className === "Image") {
         const image = selectedNode as Konva.Image;
         const imageObj = image.image();
@@ -1871,6 +1899,8 @@ function App() {
           isLocked={isLocked}
           isFavorite={isFavorite}
           cursorState={cursorState}
+          onToggleAI={handleToggleAI}
+          isAIOpen={isAIOpen}
         />
         <div
           className={`flex-1 bg-gray-100 ${previewMode ? "preview-mode" : ""}`}
@@ -1907,6 +1937,16 @@ function App() {
           index={index}
         />
       ))}
+
+      {/* AI Assistant */}
+      <AIAssistant
+        isOpen={isAIOpen}
+        onClose={handleCloseAI}
+        onIconSuggestion={handleAIIconSuggestion}
+        onAddText={handleAIAddText}
+        isMinimized={isAIMinimized}
+        onToggleMinimize={handleToggleAIMinimize}
+      />
     </div>
   );
 }
