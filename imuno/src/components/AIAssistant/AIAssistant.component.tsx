@@ -240,10 +240,10 @@ const AIAssistant: React.FC<AIAssistantProps> = ({
   if (!isOpen) return null;
 
   return (
-    <div className={`fixed bg-white rounded-lg shadow-2xl border border-gray-200 z-50 transition-all duration-300 ${
+    <div className={`fixed bg-white rounded-lg shadow-2xl border border-gray-200 z-50 transition-all duration-300 flex flex-col ${
       isMinimized
         ? 'bottom-4 right-4 w-80 h-16'
-        : 'bottom-4 right-4 w-96 h-[500px] max-h-[calc(100vh-120px)] max-w-[calc(100vw-48px)] sm:max-w-96'
+        : 'bottom-4 right-4 w-96 max-h-[90vh] max-w-[calc(100vw-24px)] sm:max-w-96 sm:h-[550px]'
     }`}>
       {/* Header */}
       <div className="flex items-center justify-between p-4 border-b border-gray-200 bg-gradient-to-r from-blue-500 to-purple-600 text-white rounded-t-lg">
@@ -270,7 +270,7 @@ const AIAssistant: React.FC<AIAssistantProps> = ({
       {!isMinimized && (
         <>
           {/* Messages */}
-          <div className="flex-1 overflow-y-auto p-4 space-y-4" style={{ height: 'calc(100% - 160px)', minHeight: '200px' }}>
+          <div className="flex-1 overflow-y-auto p-4 space-y-4 min-h-0">
             {messages.map((message) => (
               <div
                 key={message.id}
