@@ -3,7 +3,7 @@ import {
   ArrowRight, Type, Save, Undo2, Redo2,
   Scissors, Copy, Clipboard, FlipHorizontal, FlipVertical,
   Lock, Star, Layers, Crop,
-  ChevronUp, ChevronDown, PenTool, Bot
+  ChevronUp, ChevronDown, PenTool, Bot, Upload
 } from 'lucide-react';
 import { useTranslation } from '../../hooks/useTranslation';
 import LanguageSwitcher from '../LanguageSwitcher/LanguageSwitcher.component';
@@ -34,6 +34,7 @@ interface TopBarProps {
   cursorState: string;
   onToggleAI: () => void;
   isAIOpen: boolean;
+  onImageUpload: (file: File) => void;
 }
 
 const TopBar: React.FC<TopBarProps> = ({
@@ -62,8 +63,20 @@ const TopBar: React.FC<TopBarProps> = ({
   cursorState,
   onToggleAI,
   isAIOpen,
+  onImageUpload,
 }) => {
   const { t } = useTranslation();
+  const fileInputRef = React.useRef<HTMLInputElement>(null);
+
+  const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = e.target.files;
+    if (files && files.length > 0) {
+      onImageUpload(files[0]);
+    }
+    if (fileInputRef.current) {
+      fileInputRef.current.value = '';
+    }
+  };
   return (
     <div className="h-16 bg-white border-b border-gray-200 px-4 flex items-center justify-between shadow-sm">
       <div className="flex space-x-2">
@@ -82,6 +95,21 @@ const TopBar: React.FC<TopBarProps> = ({
           <Type className="h-4 w-4 mr-2" />
           {t('common.text')}
         </button>
+
+        <button
+          className="inline-flex items-center px-3 py-2 border border-gray-200 rounded-md text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+          onClick={() => fileInputRef.current?.click()}
+        >
+          <Upload className="h-4 w-4 mr-2" />
+          {t('common.uploadImage')}
+        </button>
+        <input
+          ref={fileInputRef}
+          type="file"
+          accept="image/*"
+          onChange={handleImageUpload}
+          className="hidden"
+        />
 
         <button
           className={`inline-flex items-center px-3 py-2 border border-gray-200 rounded-md text-sm font-medium ${
