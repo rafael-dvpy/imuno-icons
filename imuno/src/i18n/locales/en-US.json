@@ -116,10 +116,10 @@
       "technical": "Technical"
     },
     "items": {
-      "q1": "What is ImunoIcons?",
-      "a1": "ImunoIcons is a specialized platform for creating medical and scientific diagrams focused on immunology, cell biology, anatomy, and related fields. It provides a comprehensive library of icons and tools to help you visualize complex biological concepts.",
-      "q2": "Who is ImunoIcons designed for?",
-      "a2": "ImunoIcons is designed for students, educators, researchers, and healthcare professionals who need to create clear, accurate medical and scientific diagrams for education, presentations, and publications.",
+      "q1": "What is BioFlow?",
+      "a1": "BioFlow is a specialized platform for creating medical and scientific diagrams focused on immunology, cell biology, anatomy, and related fields. It provides a comprehensive library of icons and tools to help you visualize complex biological concepts.",
+      "q2": "Who is BioFlow designed for?",
+      "a2": "BioFlow is designed for students, educators, researchers, and healthcare professionals who need to create clear, accurate medical and scientific diagrams for education, presentations, and publications.",
       "q3": "How do I add icons to my diagram?",
       "a3": "Simply click on any icon in the left sidebar to select it, then click on your canvas to place it. You can also drag icons directly from the sidebar. Use the search bar to quickly find specific icons.",
       "q4": "Can I customize icon colors and sizes?",

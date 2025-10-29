@@ -38,7 +38,7 @@ app.post('/api/chat', async (req, res) => {
         'Content-Type': 'application/json',
         'Content-Length': Buffer.byteLength(payload),
         'HTTP-Referer': 'https://imuno-icons.com',
-        'X-Title': 'ImunoIcons',
+        'X-Title': 'BioFlow',
       },
     };
 

@@ -22,7 +22,7 @@ class OpenRouterService {
     // Initialize system message for context
     this.conversationHistory.push({
       role: 'assistant',
-      content: 'Hello! I\'m your AI assistant for ImunoIcons, a platform for creating medical diagrams focused on immunology, cell biology, and related scientific topics. I can help you understand concepts about cells, viruses, antibodies, anatomical structures, and how to use this application to create diagrams. What would you like to know?'
+      content: 'Hello! I\'m your AI assistant for BioFlow, a platform for creating medical diagrams focused on immunology, cell biology, and related scientific topics. I can help you understand concepts about cells, viruses, antibodies, anatomical structures, and how to use this application to create diagrams. What would you like to know?'
     });
   }
 
@@ -33,9 +33,9 @@ class OpenRouterService {
       content: userMessage
     });
 
-    const systemPrompt = `You are an intelligent assistant for ImunoIcons, a specialized medical diagram creation platform. Your expertise includes:
+    const systemPrompt = `You are an intelligent assistant for BioFlow, a specialized medical diagram creation platform. Your expertise includes:
 
-1. **Application Help**: Guide users on how to use ImunoIcons features like uploading images, adding icons from categories (Immunology, Anatomy, Cells and Organelles, Viruses, Proteins, Equipment), creating diagrams, and exporting their work.
+1. **Application Help**: Guide users on how to use BioFlow features like uploading images, adding icons from categories (Immunology, Anatomy, Cells and Organelles, Viruses, Proteins, Equipment), creating diagrams, and exporting their work.
 
 2. **Immunology & Biology**: Provide accurate, helpful information about:
    - Immune system components and functions
@@ -52,7 +52,7 @@ class OpenRouterService {
    - Labeling strategies
    - Best practices for scientific visualization
 
-Always be accurate, educational, and context-aware. Focus on helping users create better diagrams and understand the biological concepts they're visualizing. If asked about topics unrelated to the application or scientific/medical education, politely redirect the conversation back to topics relevant to immunology, cell biology, or using ImunoIcons.`;
+Always be accurate, educational, and context-aware. Focus on helping users create better diagrams and understand the biological concepts they're visualizing. If asked about topics unrelated to the application or scientific/medical education, politely redirect the conversation back to topics relevant to immunology, cell biology, or using BioFlow.`;
 
     try {
       // Validate API key
@@ -137,7 +137,7 @@ Always be accurate, educational, and context-aware. Focus on helping users creat
     this.conversationHistory = [
       {
         role: 'assistant',
-        content: 'Hello! I\'m your AI assistant for ImunoIcons, a platform for creating medical diagrams focused on immunology, cell biology, and related scientific topics. I can help you understand concepts about cells, viruses, antibodies, anatomical structures, and how to use this application to create diagrams. What would you like to know?'
+        content: 'Hello! I\'m your AI assistant for BioFlow, a platform for creating medical diagrams focused on immunology, cell biology, and related scientific topics. I can help you understand concepts about cells, viruses, antibodies, anatomical structures, and how to use this application to create diagrams. What would you like to know?'
       }
     ];
   }

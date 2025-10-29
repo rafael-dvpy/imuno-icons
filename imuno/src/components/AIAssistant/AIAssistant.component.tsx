@@ -29,6 +29,87 @@ interface IconSuggestion {
   relevance: number;
 }
 
+// Utilitário para aplicar negrito com **texto** sem usar dangerouslySetInnerHTML
+const applyBoldFormatting = (text: string): (string | JSX.Element)[] => {
+  const parts = text.split(/(\*\*[^*]+\*\*)/g);
+  return parts.map((part, index) => {
+    if (/^\*\*[^*]+\*\*$/.test(part)) {
+      const inner = part.slice(2, -2);
+      return (
+        <strong key={`b-${index}`}>{inner}</strong>
+      );
+    }
+    return part;
+  });
+};
+
+// Normaliza conteúdo para quebrar listas numeradas inline (" 1. ") em novas linhas
+const normalizeInlineNumberedLists = (content: string): string => {
+  return content.replace(/\s(\d+\.)\s/g, '\n$1 ');
+};
+
+// Renderiza o conteúdo em blocos: parágrafos, listas com "- " e listas numeradas "1. "
+const renderMessageContent = (rawContent: string): JSX.Element => {
+  const normalized = normalizeInlineNumberedLists(rawContent || '');
+  const blocks = normalized.trim().split(/\n\s*\n/);
+
+  const renderParagraph = (paragraph: string, key: number) => (
+    <p key={`p-${key}`} className="whitespace-pre-wrap">
+      {applyBoldFormatting(paragraph)}
+    </p>
+  );
+
+  const renderUnorderedList = (lines: string[], key: number) => (
+    <ul key={`ul-${key}`} className="list-none pl-5 space-y-1">
+      {lines.map((line, idx) => {
+        const cleaned = line.replace(/^\-\s*/, '');
+        return (
+          <li key={`ul-li-${idx}`} className="flex gap-2">
+            <span className="text-gray-500">-</span>
+            <span>{applyBoldFormatting(cleaned)}</span>
+          </li>
+        );
+      })}
+    </ul>
+  );
+
+  const renderOrderedList = (lines: string[], key: number) => (
+    <ol key={`ol-${key}`} className="list-decimal pl-5 space-y-1">
+      {lines.map((line, idx) => (
+        <li key={`ol-li-${idx}`}>{applyBoldFormatting(line.replace(/^\d+\.\s*/, ''))}</li>
+      ))}
+    </ol>
+  );
+
+  return (
+    <div className="text-sm leading-6 space-y-2">
+      {blocks.map((block, i) => {
+        const lines = block.split(/\n/).filter(l => l.trim().length > 0);
+        if (lines.length > 0 && lines.every(l => /^\-\s+/.test(l))) {
+          return renderUnorderedList(lines, i);
+        }
+        if (lines.length > 0 && lines.every(l => /^\d+\.\s+/.test(l))) {
+          return renderOrderedList(lines, i);
+        }
+        // Se o bloco tem mistura, tenta dividir listas parciais
+        const listLike = lines.filter(l => /^\-\s+|^\d+\.\s+/.test(l));
+        if (listLike.length >= 2) {
+          const listTypeIsOrdered = listLike.every(l => /^\d+\.\s+/.test(l));
+          const listBlock = listLike;
+          const otherBlock = lines.filter(l => !listBlock.includes(l)).join('\n');
+          return (
+            <div key={`mixed-${i}`} className="space-y-2">
+              {otherBlock ? renderParagraph(otherBlock, i) : null}
+              {listTypeIsOrdered ? renderOrderedList(listBlock, i) : renderUnorderedList(listBlock, i)}
+            </div>
+          );
+        }
+        return renderParagraph(lines.join('\n'), i);
+      })}
+    </div>
+  );
+};
+
 const AIAssistant: React.FC<AIAssistantProps> = ({
   isOpen,
   onClose,
@@ -52,12 +133,11 @@ const AIAssistant: React.FC<AIAssistantProps> = ({
   const inputRef = useRef<HTMLInputElement>(null);
   const openRouterServiceRef = useRef<OpenRouterService | null>(null);
 
-  // Initialize OpenRouter service on mount
   useEffect(() => {
     const apiKey =
       (import.meta.env as any).VITE_OPENROUTER_API_KEY ||
       (import.meta.env as any).VITE_GROQ_API_KEY ||
-      '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';
+      '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';
 
     openRouterServiceRef.current = new OpenRouterService(apiKey);
   }, []);
@@ -289,7 +369,7 @@ const AIAssistant: React.FC<AIAssistantProps> = ({
                   >
                     <div className="flex gap-2">
                       {message.error && <AlertCircle className="h-4 w-4 flex-shrink-0 mt-0.5" />}
-                      <p className="text-sm">{message.content}</p>
+                      {renderMessageContent(message.content)}
                     </div>
                     
                     {message.suggestions && message.suggestions.length > 0 && (

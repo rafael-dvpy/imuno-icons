@@ -1338,7 +1338,7 @@ function App() {
       });
 
       if (dataURL) {
-        downloadURI(dataURL, "Your-Project-ImunoIcons.png");
+        downloadURI(dataURL, "Your-Project-BioFlow.png");
       }
     }, 1);
   };
