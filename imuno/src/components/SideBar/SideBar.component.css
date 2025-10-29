@@ -1,7 +1,7 @@
 /* Custom scrollbar styles */
 .scrollbar-custom {
   scrollbar-width: thin; /* Firefox */
-  scrollbar-color: #3182ce #e2e8f0; /* Firefox (thumb, track) */
+  scrollbar-color: #45a9cc #45a9cc; /* Firefox (thumb, track) */
 }
 
 /* Webkit browsers (Chrome, Safari, Edge) */
@@ -10,16 +10,71 @@
 }
 
 .scrollbar-custom::-webkit-scrollbar-track {
-  background-color: #e2e8f0; /* Light track color */
+  background-color: #45a9cc; /* Light track color */
   border-radius: 10px;
 }
 
 .scrollbar-custom::-webkit-scrollbar-thumb {
-  background-color: #3182ce; /* Thumb color */
+  background-color: #45a9cc; /* Thumb color */
   border-radius: 10px;
-  border: 2px solid #e2e8f0; /* Border around the thumb */
+  border: 2px solid #45a9cc; /* Border around the thumb */
 }
 
 .scrollbar-custom::-webkit-scrollbar-thumb:hover {
   background-color: #63b3ed; /* Hover effect on thumb */
+}
+
+/* Icon zoom effect */
+.icon-item {
+  transition: all 0.2s ease-in-out;
+  cursor: pointer;
+}
+
+.icon-item:hover {
+  transform: scale(1.15);
+  z-index: 10;
+}
+
+.icon-item:active {
+  transform: scale(0.95);
+}
+
+/* Category and subcategory hover effects */
+.category-header {
+  transition: all 0.2s ease;
+}
+
+.category-header:hover {
+  background-color: rgba(66, 153, 225, 0.3);
+  transform: translateX(2px);
+}
+
+.subcategory-header {
+  transition: all 0.15s ease;
+}
+
+.subcategory-header:hover {
+  background-color: rgba(66, 153, 225, 0.2);
+  transform: translateX(2px);
+}
+
+/* FAQ button styles */
+.faq-button {
+  transition: all 0.3s ease;
+}
+
+.faq-button:hover {
+  background-color: #e6fffa;
+  border-color: #38b2ac;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(56, 178, 172, 0.2);
+}
+
+.faq-button:focus {
+  outline: 2px solid #38b2ac;
+  outline-offset: 2px;
+}
+
+.faq-button:active {
+  transform: translateY(0);
 }

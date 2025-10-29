@@ -6,6 +6,7 @@ import SideBar from "./components/SideBar/SideBar.component";
 import TopBar from "./components/TopBar/TopBar.component";
 import RightControls from "./components/RightControls/RightControls.component";
 import AIAssistant from "./components/AIAssistant/AIAssistant.component";
+import FAQ from "./components/FAQ/FAQ.component";
 import iconData from "./data/iconData";
 import svgCache from "./services/SvgCache";
 import { BathIcon } from "lucide-react";
@@ -50,9 +51,18 @@ function App() {
   }[]>([]);
   const [isAIOpen, setIsAIOpen] = useState(false);
   const [isAIMinimized, setIsAIMinimized] = useState(false);
+  const [isFAQOpen, setIsFAQOpen] = useState(false);
 
   const selectingCursorState = () => {
     setCursorState("selecting");
+  };
+
+  const handleOpenFAQ = () => {
+    setIsFAQOpen(true);
+  };
+
+  const handleCloseFAQ = () => {
+    setIsFAQOpen(false);
   };
 
   const handleToggleAI = () => {
@@ -1328,7 +1338,7 @@ function App() {
       });
 
       if (dataURL) {
-        downloadURI(dataURL, "Your-Project-ImunoIcons.png");
+        downloadURI(dataURL, "Your-Project-BioFlow.png");
       }
     }, 1);
   };
@@ -1929,7 +1939,7 @@ function App() {
 
   return (
     <div className="flex h-screen bg-gray-50">
-      <SideBar onItemClick={handleShapeClick} items={iconData} />
+      <SideBar onItemClick={handleShapeClick} items={iconData} onFAQClick={handleOpenFAQ} />
       <div className="flex-1 flex flex-col">
         <TopBar
           onSaveClick={handleSaveClick}
@@ -2004,6 +2014,9 @@ function App() {
         isMinimized={isAIMinimized}
         onToggleMinimize={handleToggleAIMinimize}
       />
+
+      {/* FAQ Modal */}
+      <FAQ isOpen={isFAQOpen} onClose={handleCloseFAQ} />
     </div>
   );
 }

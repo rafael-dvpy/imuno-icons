@@ -27,7 +27,9 @@
     "canvasColor": "Canvas Color",
     "language": "Language",
     "askAI": "Ask AI",
-    "uploadImage": "Upload Image"
+    "uploadImage": "Upload Image",
+    "close": "Close",
+    "faq": "FAQ"
   },
   "categories": {
     "immunology": "Immunology",
@@ -99,6 +101,37 @@
       "iconSearch": "I found {{count}} icons related to your search:",
       "defaultHelp": "I can help you find specific icons, create medical diagrams, or give suggestions on how to improve your design. What kind of help do you need?",
       "iconAdded": "{{name}} has been added to your diagram!"
+    }
+  },
+  "faq": {
+    "title": "Frequently Asked Questions",
+    "noResults": "No questions found for this category",
+    "footer": "Can't find what you're looking for? Use the AI Assistant to ask your questions!",
+    "categories": {
+      "all": "All",
+      "general": "General",
+      "features": "Features",
+      "icons": "Icons",
+      "export": "Export",
+      "technical": "Technical"
+    },
+    "items": {
+      "q1": "What is BioFlow?",
+      "a1": "BioFlow is a specialized platform for creating medical and scientific diagrams focused on immunology, cell biology, anatomy, and related fields. It provides a comprehensive library of icons and tools to help you visualize complex biological concepts.",
+      "q2": "Who is BioFlow designed for?",
+      "a2": "BioFlow is designed for students, educators, researchers, and healthcare professionals who need to create clear, accurate medical and scientific diagrams for education, presentations, and publications.",
+      "q3": "How do I add icons to my diagram?",
+      "a3": "Simply click on any icon in the left sidebar to select it, then click on your canvas to place it. You can also drag icons directly from the sidebar. Use the search bar to quickly find specific icons.",
+      "q4": "Can I customize icon colors and sizes?",
+      "a4": "Yes! Once you've placed an icon on the canvas, you can resize it by dragging the corners, and you can change its properties using the controls on the right panel. You can also lock icons to prevent accidental modifications.",
+      "q5": "What categories of icons are available?",
+      "a5": "We provide icons in six main categories: Immunology, Anatomy, Cells and Organelles, Viruses, Proteins, and Equipment. Each category contains detailed, scientifically accurate illustrations.",
+      "q6": "How do I search for specific icons?",
+      "a6": "Use the search bar at the top of the left sidebar. Type keywords related to what you're looking for (e.g., 'antibody', 'nucleus', 'virus') and the sidebar will filter and display matching icons.",
+      "q7": "How do I export my diagram?",
+      "a7": "Click the 'Save' button in the top bar to export your diagram as a PNG image. You can then use this image in presentations, documents, or publications.",
+      "q8": "Can I use my own images in diagrams?",
+      "a8": "Yes! Use the 'Upload Image' button in the top bar to add your own images to the canvas. You can then position and scale them just like any other element."
     }
   }
 }
