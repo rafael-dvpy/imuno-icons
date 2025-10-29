@@ -87,13 +87,14 @@ Always be accurate, educational, and context-aware. Focus on helping users creat
       console.log('Response status:', response.status);
 
       if (!response.ok) {
+        // Read body only once to avoid "body stream already read" errors
+        const rawBody = await response.text();
         let errorMessage = response.statusText;
         try {
-          const errorData = await response.json();
-          errorMessage = errorData.error?.message || errorData.message || response.statusText;
-        } catch (e) {
-          const text = await response.text();
-          errorMessage = text || response.statusText;
+          const parsed = rawBody ? JSON.parse(rawBody) : null;
+          errorMessage = parsed?.error?.message || parsed?.message || response.statusText;
+        } catch {
+          errorMessage = rawBody || response.statusText;
         }
         throw new Error(`API error (${response.status}): ${errorMessage}`);
       }

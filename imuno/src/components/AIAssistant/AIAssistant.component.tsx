@@ -54,10 +54,12 @@ const AIAssistant: React.FC<AIAssistantProps> = ({
 
   // Initialize OpenRouter service on mount
   useEffect(() => {
-    const apiKey = import.meta.env.VITE_GROQ_API_KEY;
-    if (apiKey) {
-      openRouterServiceRef.current = new OpenRouterService(apiKey);
-    }
+    const apiKey =
+      (import.meta.env as any).VITE_OPENROUTER_API_KEY ||
+      (import.meta.env as any).VITE_GROQ_API_KEY ||
+      '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';
+
+    openRouterServiceRef.current = new OpenRouterService(apiKey);
   }, []);
 
   const scrollToBottom = () => {
@@ -76,38 +78,43 @@ const AIAssistant: React.FC<AIAssistantProps> = ({
 
   const searchIcons = (query: string): IconSuggestion[] => {
     const suggestions: IconSuggestion[] = [];
-    const queryLower = query.toLowerCase();
+    const queryLower = String(query || '').toLowerCase();
 
-    Object.keys(iconData).forEach(category => {
-      const categoryData = iconData[category];
+    Object.keys(iconData || {}).forEach((categoryKey) => {
+      const category = String(categoryKey || '');
+      const categoryLower = category.toLowerCase();
+      const categoryData = (iconData as any)[categoryKey];
       
       if (Array.isArray(categoryData)) {
-        categoryData.forEach(item => {
-          const nameMatch = item.name.toLowerCase().includes(queryLower);
-          const categoryMatch = category.toLowerCase().includes(queryLower);
+        categoryData.forEach((item: any) => {
+          const itemName = String(item?.name || '').toLowerCase();
+          const nameMatch = itemName.includes(queryLower);
+          const categoryMatch = categoryLower.includes(queryLower);
           
           if (nameMatch || categoryMatch) {
             suggestions.push({
-              id: item.id,
-              name: item.name,
+              id: String(item?.id || ''),
+              name: String(item?.name || 'Sem nome'),
               category: category,
               relevance: nameMatch ? 1 : 0.5
             });
           }
         });
-      } else {
-        Object.keys(categoryData).forEach(subcategory => {
-          const subcategoryData = categoryData[subcategory];
+      } else if (categoryData && typeof categoryData === 'object') {
+        Object.keys(categoryData).forEach((subcategoryKey) => {
+          const subcategory = String(subcategoryKey || '');
+          const subcategoryLower = subcategory.toLowerCase();
+          const subcategoryData = (categoryData as any)[subcategoryKey];
           if (Array.isArray(subcategoryData)) {
-            subcategoryData.forEach(item => {
-              const nameMatch = item.name.toLowerCase().includes(queryLower);
-              const categoryMatch = category.toLowerCase().includes(queryLower) || 
-                                  subcategory.toLowerCase().includes(queryLower);
+            subcategoryData.forEach((item: any) => {
+              const itemName = String(item?.name || '').toLowerCase();
+              const nameMatch = itemName.includes(queryLower);
+              const categoryMatch = categoryLower.includes(queryLower) || subcategoryLower.includes(queryLower);
               
               if (nameMatch || categoryMatch) {
                 suggestions.push({
-                  id: item.id,
-                  name: item.name,
+                  id: String(item?.id || ''),
+                  name: String(item?.name || 'Sem nome'),
                   category: `${category} > ${subcategory}`,
                   relevance: nameMatch ? 1 : 0.5
                 });
