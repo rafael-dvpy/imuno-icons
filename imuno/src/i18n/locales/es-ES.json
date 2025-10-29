@@ -27,7 +27,9 @@
     "canvasColor": "Color del lienzo",
     "language": "Idioma",
     "askAI": "Preguntar a la IA",
-    "uploadImage": "Cargar imagen"
+    "uploadImage": "Cargar imagen",
+    "close": "Cerrar",
+    "faq": "FAQ"
   },
   "categories": {
     "immunology": "Inmunología",
@@ -99,6 +101,37 @@
       "iconSearch": "Encontré {{count}} iconos relacionados con tu búsqueda:",
       "defaultHelp": "Puedo ayudarte a encontrar iconos específicos, crear diagramas médicos, o dar sugerencias sobre cómo mejorar tu diseño. ¿Qué tipo de ayuda necesitas?",
       "iconAdded": "¡{{name}} ha sido añadido a tu diagrama!"
+    }
+  },
+  "faq": {
+    "title": "Preguntas Frecuentes",
+    "noResults": "No se encontraron preguntas en esta categoría",
+    "footer": "¿No encuentras lo que buscas? ¡Usa el Asistente de IA para hacer tus preguntas!",
+    "categories": {
+      "all": "Todas",
+      "general": "General",
+      "features": "Características",
+      "icons": "Iconos",
+      "export": "Exportar",
+      "technical": "Técnico"
+    },
+    "items": {
+      "q1": "¿Qué es ImunoIcons?",
+      "a1": "ImunoIcons es una plataforma especializada para crear diagramas médicos y científicos enfocados en inmunología, biología celular, anatomía y campos relacionados. Proporciona una biblioteca completa de iconos y herramientas para ayudarte a visualizar conceptos biológicos complejos.",
+      "q2": "¿Para quién fue diseñado ImunoIcons?",
+      "a2": "ImunoIcons fue diseñado para estudiantes, educadores, investigadores y profesionales de la salud que necesitan crear diagramas médicos y científicos claros y precisos para educación, presentaciones y publicaciones.",
+      "q3": "¿Cómo agrego iconos a mi diagrama?",
+      "a3": "Simplemente haz clic en cualquier icono en la barra lateral izquierda para seleccionarlo, luego haz clic en tu lienzo para colocarlo. También puedes arrastrar iconos directamente desde la barra lateral. Usa la barra de búsqueda para encontrar iconos específicos rápidamente.",
+      "q4": "¿Puedo personalizar los colores y tamaños de los iconos?",
+      "a4": "¡Sí! Una vez que hayas colocado un icono en el lienzo, puedes redimensionarlo arrastrando las esquinas y puedes cambiar sus propiedades usando los controles en el panel derecho. También puedes bloquear iconos para evitar modificaciones accidentales.",
+      "q5": "¿Qué categorías de iconos están disponibles?",
+      "a5": "Proporcionamos iconos en seis categorías principales: Inmunología, Anatomía, Células y Orgánulos, Virus, Proteínas y Equipos. Cada categoría contiene ilustraciones detalladas y científicamente precisas.",
+      "q6": "¿Cómo busco iconos específicos?",
+      "a6": "Usa la barra de búsqueda en la parte superior de la barra lateral izquierda. Escribe palabras clave relacionadas con lo que buscas (por ejemplo, 'anticuerpo', 'núcleo', 'virus') y la barra lateral filtrará y mostrará los iconos coincidentes.",
+      "q7": "¿Cómo exporto mi diagrama?",
+      "a7": "Haz clic en el botón 'Guardar' en la barra superior para exportar tu diagrama como una imagen PNG. Luego puedes usar esta imagen en presentaciones, documentos o publicaciones.",
+      "q8": "¿Puedo usar mis propias imágenes en diagramas?",
+      "a8": "¡Sí! Usa el botón 'Cargar imagen' en la barra superior para agregar tus propias imágenes al lienzo. Luego puedes posicionarlas y escalarlas como cualquier otro elemento."
     }
   }
 }

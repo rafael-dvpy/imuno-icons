@@ -3,6 +3,7 @@ import SearchBar from "../SearchBar.component";
 import "./SideBar.component.css";
 import Icon from "../Icon.component";
 import { useTranslation } from "../../hooks/useTranslation";
+import { HelpCircle } from "lucide-react";
 
 // Define a estrutura para os itens
 export interface IconItem {
@@ -18,9 +19,10 @@ export interface IconCategories {
 interface SideBarProps {
   onItemClick: (objId: string) => void;
   items: IconCategories;
+  onFAQClick: () => void;
 }
 
-const SideBar: React.FC<SideBarProps> = ({ onItemClick, items }) => {
+const SideBar: React.FC<SideBarProps> = ({ onItemClick, items, onFAQClick }) => {
   const { t } = useTranslation();
   const [searchTerm, setSearchTerm] = useState<string>("");
   const [expandedCategories, setExpandedCategories] = useState<{[key: string]: boolean}>({
@@ -163,8 +165,18 @@ const SideBar: React.FC<SideBarProps> = ({ onItemClick, items }) => {
         {items.map((item, index) => (
           <li
             key={index}
-            className="flex flex-col items-center cursor-pointer hover:bg-blue-50 p-2 rounded-md"
+            className="icon-item flex flex-col items-center hover:bg-blue-50 p-2 rounded-md focus-within:ring-2 focus-within:ring-blue-400 focus-within:ring-offset-0"
             onClick={() => onItemClick(item.id)}
+            onKeyPress={(e) => {
+              if (e.key === 'Enter' || e.key === ' ') {
+                e.preventDefault();
+                onItemClick(item.id);
+              }
+            }}
+            role="button"
+            tabIndex={0}
+            aria-label={item.id}
+            title={item.id}
           >
             <div className="w-12 h-12 flex items-center justify-center">
               <Icon src={item.url} size="thumbnail" />
@@ -191,14 +203,23 @@ const SideBar: React.FC<SideBarProps> = ({ onItemClick, items }) => {
           <div className="space-y-4">
             {Object.keys(filteredItems).map(category => (
               <div key={category} className="mb-4">
-                <div 
-                  className="flex items-center justify-between cursor-pointer bg-blue-200 p-2 rounded-md mb-2"
+                <div
+                  className="category-header flex items-center justify-between bg-blue-200 p-2 rounded-md mb-2 focus-within:ring-2 focus-within:ring-blue-400 focus-within:ring-offset-0"
                   onClick={() => toggleCategory(category)}
+                  onKeyPress={(e) => {
+                    if (e.key === 'Enter' || e.key === ' ') {
+                      e.preventDefault();
+                      toggleCategory(category);
+                    }
+                  }}
+                  role="button"
+                  tabIndex={0}
+                  aria-expanded={expandedCategories[category]}
                 >
                   <h3 className="font-bold text-gray-700">
                     {getCategoryName(category)}
                   </h3>
-                  <span>{expandedCategories[category] ? '▼' : '►'}</span>
+                  <span aria-hidden="true">{expandedCategories[category] ? '▼' : '►'}</span>
                 </div>
                 
                 {expandedCategories[category] && (
@@ -210,9 +231,18 @@ const SideBar: React.FC<SideBarProps> = ({ onItemClick, items }) => {
                       // Renderizar subcategorias
                       Object.keys(filteredItems[category]).map(subcategory => (
                         <div key={subcategory} className="mb-3">
-                          <div 
-                            className="flex items-center justify-between cursor-pointer bg-blue-100 p-1 rounded-md mb-2"
+                          <div
+                            className="subcategory-header flex items-center justify-between bg-blue-100 p-1 rounded-md mb-2 focus-within:ring-2 focus-within:ring-blue-300 focus-within:ring-offset-0"
                             onClick={() => toggleSubcategory(category, subcategory)}
+                            onKeyPress={(e) => {
+                              if (e.key === 'Enter' || e.key === ' ') {
+                                e.preventDefault();
+                                toggleSubcategory(category, subcategory);
+                              }
+                            }}
+                            role="button"
+                            tabIndex={0}
+                            aria-expanded={expandedSubcategories[`${category}-${subcategory}`]}
                           >
                             <h4 className="font-medium text-gray-700 text-sm">
                               {getSubcategoryName(subcategory)}
@@ -220,7 +250,7 @@ const SideBar: React.FC<SideBarProps> = ({ onItemClick, items }) => {
                                 ({(filteredItems[category] as any)[subcategory].length})
                               </span>
                             </h4>
-                            <span>{expandedSubcategories[`${category}-${subcategory}`] ? '▼' : '►'}</span>
+                            <span aria-hidden="true">{expandedSubcategories[`${category}-${subcategory}`] ? '▼' : '►'}</span>
                           </div>
                           
                           {expandedSubcategories[`${category}-${subcategory}`] && (
@@ -235,8 +265,21 @@ const SideBar: React.FC<SideBarProps> = ({ onItemClick, items }) => {
             ))}
           </div>
         ) : (
-          <p className="text-gray-500">{t('search.noResults')}</p>
+          <p className="text-gray-500 text-center py-4">{t('search.noResults')}</p>
         )}
+      </div>
+
+      {/* FAQ Button at bottom */}
+      <div className="border-t border-blue-200 p-4 bg-gradient-to-t from-blue-50 to-transparent">
+        <button
+          onClick={onFAQClick}
+          className="faq-button w-full flex items-center justify-center gap-2 px-4 py-3 bg-white border-2 border-teal-400 rounded-lg font-medium text-teal-700 hover:bg-teal-50 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-teal-400 focus:ring-offset-0"
+          title={t('common.faq')}
+          aria-label={t('common.faq')}
+        >
+          <HelpCircle className="w-5 h-5" />
+          <span className="text-sm">{t('common.faq')}</span>
+        </button>
       </div>
     </div>
   );

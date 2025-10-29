@@ -27,7 +27,9 @@
     "canvasColor": "Cor do canvas",
     "language": "Idioma",
     "askAI": "Perguntar à IA",
-    "uploadImage": "Carregar imagem"
+    "uploadImage": "Carregar imagem",
+    "close": "Fechar",
+    "faq": "FAQ"
   },
   "categories": {
     "immunology": "Imunologia",
@@ -99,6 +101,37 @@
       "iconSearch": "Encontrei {{count}} ícones relacionados à sua busca:",
       "defaultHelp": "Posso ajudar você a encontrar ícones específicos, criar diagramas médicos, ou dar sugestões sobre como melhorar seu design. Que tipo de ajuda você precisa?",
       "iconAdded": "{{name}} foi adicionado ao seu diagrama!"
+    }
+  },
+  "faq": {
+    "title": "Perguntas Frequentes",
+    "noResults": "Nenhuma pergunta encontrada nesta categoria",
+    "footer": "Não conseguiu encontrar o que procura? Use o Assistente de IA para fazer suas perguntas!",
+    "categories": {
+      "all": "Todas",
+      "general": "Geral",
+      "features": "Recursos",
+      "icons": "Ícones",
+      "export": "Exportar",
+      "technical": "Técnico"
+    },
+    "items": {
+      "q1": "O que é ImunoIcons?",
+      "a1": "ImunoIcons é uma plataforma especializada para criar diagramas médicos e científicos focados em imunologia, biologia celular, anatomia e campos relacionados. Fornece uma biblioteca abrangente de ícones e ferramentas para ajudar você a visualizar conceitos biológicos complexos.",
+      "q2": "Para quem o ImunoIcons foi projetado?",
+      "a2": "ImunoIcons foi projetado para estudantes, educadores, pesquisadores e profissionais de saúde que precisam criar diagramas médicos e científicos claros e precisos para educação, apresentações e publicações.",
+      "q3": "Como adiciono ícones ao meu diagrama?",
+      "a3": "Simplesmente clique em qualquer ícone na barra lateral esquerda para selecioná-lo e clique no seu canvas para colocá-lo. Você também pode arrastar ícones diretamente da barra lateral. Use a barra de pesquisa para encontrar ícones específicos rapidamente.",
+      "q4": "Posso personalizar as cores e tamanhos dos ícones?",
+      "a4": "Sim! Depois de colocar um ícone no canvas, você pode redimensioná-lo arrastando os cantos e alterar suas propriedades usando os controles no painel direito. Você também pode bloquear ícones para evitar modificações acidentais.",
+      "q5": "Quais categorias de ícones estão disponíveis?",
+      "a5": "Fornecemos ícones em seis categorias principais: Imunologia, Anatomia, Células e Organelas, Vírus, Proteínas e Equipamentos. Cada categoria contém ilustrações detalhadas e cientificamente precisas.",
+      "q6": "Como procuro por ícones específicos?",
+      "a6": "Use a barra de pesquisa no topo da barra lateral esquerda. Digite palavras-chave relacionadas ao que você procura (por exemplo, 'anticorpo', 'núcleo', 'vírus') e a barra lateral filtrará e exibirá os ícones correspondentes.",
+      "q7": "Como exporto meu diagrama?",
+      "a7": "Clique no botão 'Salvar' na barra superior para exportar seu diagrama como uma imagem PNG. Você pode então usar esta imagem em apresentações, documentos ou publicações.",
+      "q8": "Posso usar minhas próprias imagens em diagramas?",
+      "a8": "Sim! Use o botão 'Carregar imagem' na barra superior para adicionar suas próprias imagens ao canvas. Você pode então posicioná-las e escaloná-las assim como qualquer outro elemento."
     }
   }
 }
